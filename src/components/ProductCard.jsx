@@ -1,6 +1,14 @@
 import { Star, ShoppingCart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const ProductCard = ({ product }) => {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    // Scroll to top immediately before navigating
+    window.scrollTo(0, 0);
+    navigate(`/product/${product.id}`);
+  };
   const renderStars = (rating) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -30,7 +38,10 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <div className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100">
+    <div
+      onClick={handleCardClick}
+      className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer"
+    >
       <div className="aspect-square overflow-hidden bg-gray-50">
         <img
           src={product.image}

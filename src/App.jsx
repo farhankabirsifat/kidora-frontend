@@ -1,44 +1,29 @@
-import Navbar from './components/Navbar';
-import HeroBanner from './components/HeroBanner';
-import Categories from './components/Categories';
-import ProductSection from './components/ProductSection';
-import Footer from './components/Footer';
-import { boysItems, girlsDresses, parentsItems } from './data/products';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { CartProvider } from "./context/CartContext";
+import Navbar from "./components/Navbar";
+import HomePage from "./pages/HomePage";
+import CategoryPage from "./pages/CategoryPage";
+import ProductDetails from "./pages/ProductDetails";
+import CartPage from "./pages/CartPage";
+import WishlistPage from "./pages/WishlistPage";
+import "./App.css";
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <HeroBanner />
-      <Categories />
-      
-      {/* Boys Items Section */}
-      <ProductSection 
-        title="Boy's Item" 
-        products={boysItems} 
-        titleColor="text-blue-600"
-      />
-      
-      {/* Girls Dress Section */}
-      <div className="bg-white">
-        <ProductSection 
-          title="Girls Dress" 
-          products={girlsDresses} 
-          titleColor="text-pink-600"
-        />
-      </div>
-      
-      {/* Parent's Item Section */}
-      <ProductSection 
-        title="Parent's Item" 
-        products={parentsItems} 
-        titleColor="text-green-600"
-        isParentSection={true}
-      />
-      
-      <Footer />
-    </div>
+    <CartProvider>
+      <Router>
+        <div className="min-h-screen bg-gray-50">
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/category/:categoryName" element={<CategoryPage />} />
+            <Route path="/product/:productId" element={<ProductDetails />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/wishlist" element={<WishlistPage />} />
+          </Routes>
+        </div>
+      </Router>
+    </CartProvider>
   );
 }
 

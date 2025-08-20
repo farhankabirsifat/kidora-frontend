@@ -1,8 +1,12 @@
 import { Search, User, ShoppingCart, Menu, X, Bell, Heart } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const { cartItemsCount, wishlistItemsCount } = useCart();
 
   return (
     <nav className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
@@ -10,7 +14,12 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16 lg:h-18">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <img src="/logo.png" alt="KIDORA" className="h-8 lg:h-10 w-auto" />
+            <img
+              src="/logo.png"
+              alt="KIDORA"
+              className="h-8 lg:h-10 w-auto cursor-pointer"
+              onClick={() => navigate("/")}
+            />
           </div>
 
           {/* Search Bar - Center positioned */}
@@ -30,11 +39,16 @@ const Navbar = () => {
           {/* Desktop Icons */}
           <div className="hidden lg:flex items-center space-x-4">
             {/* Wishlist */}
-            <button className="relative p-2 text-gray-600 hover:text-red-500 transition-colors group">
+            <button
+              onClick={() => navigate("/wishlist")}
+              className="relative p-2 text-gray-600 hover:text-red-500 transition-colors group"
+            >
               <Heart className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">
-                0
-              </span>
+              {wishlistItemsCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-semibold">
+                  {wishlistItemsCount}
+                </span>
+              )}
             </button>
 
             {/* Notifications */}
@@ -46,11 +60,16 @@ const Navbar = () => {
             </button>
 
             {/* Cart */}
-            <button className="relative p-2 text-gray-600 hover:text-green-500 transition-colors group">
+            <button
+              onClick={() => navigate("/cart")}
+              className="relative p-2 text-gray-600 hover:text-green-500 transition-colors group"
+            >
               <ShoppingCart className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-semibold">
-                2
-              </span>
+              {cartItemsCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-semibold">
+                  {cartItemsCount}
+                </span>
+              )}
             </button>
 
             {/* User Profile */}
@@ -72,11 +91,16 @@ const Navbar = () => {
             </button>
 
             {/* Mobile Cart */}
-            <button className="relative p-2 text-gray-600 hover:text-green-500 transition-colors">
+            <button
+              onClick={() => navigate("/cart")}
+              className="relative p-2 text-gray-600 hover:text-green-500 transition-colors"
+            >
               <ShoppingCart className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center text-[10px]">
-                2
-              </span>
+              {cartItemsCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-semibold">
+                  {cartItemsCount}
+                </span>
+              )}
             </button>
 
             {/* Mobile Menu Button */}
@@ -111,10 +135,13 @@ const Navbar = () => {
 
               {/* Mobile Menu Items */}
               <div className="grid grid-cols-2 gap-4 mt-6">
-                <button className="flex flex-col items-center space-y-2 p-4 rounded-lg hover:bg-gray-50 transition-colors">
+                <button
+                  onClick={() => navigate("/wishlist")}
+                  className="flex flex-col items-center space-y-2 p-4 rounded-lg hover:bg-gray-50 transition-colors"
+                >
                   <Heart className="w-6 h-6 text-red-500" />
                   <span className="text-sm font-medium text-gray-700">
-                    Wishlist
+                    Wishlist ({wishlistItemsCount})
                   </span>
                 </button>
 
@@ -132,10 +159,13 @@ const Navbar = () => {
                   </span>
                 </button>
 
-                <button className="flex flex-col items-center space-y-2 p-4 rounded-lg hover:bg-gray-50 transition-colors">
+                <button
+                  onClick={() => navigate("/cart")}
+                  className="flex flex-col items-center space-y-2 p-4 rounded-lg hover:bg-gray-50 transition-colors"
+                >
                   <ShoppingCart className="w-6 h-6 text-green-500" />
                   <span className="text-sm font-medium text-gray-700">
-                    Cart (2)
+                    Cart ({cartItemsCount})
                   </span>
                 </button>
               </div>

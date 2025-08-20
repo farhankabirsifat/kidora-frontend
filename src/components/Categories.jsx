@@ -1,4 +1,8 @@
+import { useNavigate } from "react-router-dom";
+
 const Categories = () => {
+  const navigate = useNavigate();
+
   const categories = [
     {
       id: 1,
@@ -20,6 +24,10 @@ const Categories = () => {
     },
   ];
 
+  const handleCategoryClick = (categoryName) => {
+    navigate(`/category/${categoryName.toLowerCase()}`);
+  };
+
   return (
     <section className="py-12 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,7 +35,8 @@ const Categories = () => {
           {categories.map((category, index) => (
             <div
               key={category.id}
-              className="group cursor-pointer bg-gray-50 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 h-64 w-full"
+              onClick={() => handleCategoryClick(category.name)}
+              className="group cursor-pointer bg-gray-50 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 h-64 w-full transform hover:-translate-y-1"
             >
               {/* Image Container */}
               <div className="relative w-full h-full bg-gray-100 overflow-hidden">

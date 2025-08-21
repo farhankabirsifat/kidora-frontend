@@ -12,7 +12,7 @@ function App() {
   return (
     <CartProvider>
       <Router>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 pt-16">
           <Navbar />
           <Routes>
             <Route path="/" element={<HomePage />} />

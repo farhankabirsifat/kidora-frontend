@@ -47,7 +47,7 @@ const HeroBanner = () => {
             <div className="flex items-center justify-center lg:justify-start space-x-6 mb-8">
               <div className="text-center">
                 <span className="text-4xl md:text-5xl font-black text-white drop-shadow-lg">
-                  $ {heroProduct.price}
+                  {heroProduct.price}
                 </span>
                 <div className="text-xs text-blue-100 uppercase tracking-wide mt-1">
                   Now
@@ -55,7 +55,7 @@ const HeroBanner = () => {
               </div>
               <div className="text-center opacity-75">
                 <span className="text-2xl text-white line-through">
-                  $ {heroProduct.oldPrice}
+                  {heroProduct.oldPrice}
                 </span>
                 <div className="text-xs text-blue-200 uppercase tracking-wide mt-1">
                   Was

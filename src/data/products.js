@@ -94,7 +94,7 @@ export const boysItems = [
   {
     id: 5,
     title: "New Short Sleeve Casual Shirt for Men",
-    price: "$ 267",
+    price: "৳ 267",
     rating: 4.9,
     reviews: "1000+",
     category: "men",
@@ -110,7 +110,7 @@ export const boysItems = [
   {
     id: 6,
     title: "Long Sleeve Casual shirt for men",
-    price: "$ 180",
+    price: "৳ 180",
     rating: 4.5,
     reviews: "1350+",
     category: "men",
@@ -126,7 +126,7 @@ export const boysItems = [
   {
     id: 7,
     title: "Cotton Stylish & Comfortable Casual Shirt for Men",
-    price: "$ 220",
+    price: "৳ 220",
     rating: 4.6,
     reviews: "1200+",
     category: "men",
@@ -142,7 +142,7 @@ export const boysItems = [
   {
     id: 8,
     title: "New Stylish & Fashionable Full Sleeve Formal Shirts For Men",
-    price: "$ 310",
+    price: "৳ 310",
     rating: 4.9,
     reviews: "1100+",
     category: "men",
@@ -158,7 +158,7 @@ export const boysItems = [
   {
     id: 9,
     title: "Men's Formal Wear Collection",
-    price: "$ 335",
+    price: "৳ 335",
     rating: 5.0,
     reviews: "1700+",
     category: "men",
@@ -176,7 +176,7 @@ export const boysItems = [
   {
     id: 10,
     title: "High quality Men's full sleeve Cotton Formal Shirt",
-    price: "$ 180",
+    price: "৳ 180",
     rating: 4.5,
     reviews: "1300+",
     category: "men",
@@ -192,7 +192,7 @@ export const boysItems = [
   {
     id: 11,
     title: "STYLISH new fashion long sleeve shirt for men",
-    price: "$ 135",
+    price: "৳ 135",
     rating: 4.6,
     reviews: "2010+",
     category: "men",
@@ -208,7 +208,7 @@ export const boysItems = [
   {
     id: 12,
     title: "Denim Stylish Long Sleeve shirt For Men",
-    price: "$ 110",
+    price: "৳ 110",
     rating: 5.0,
     reviews: "1950+",
     category: "men",

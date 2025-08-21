@@ -461,7 +461,7 @@ const CategoryPage = () => {
                 Free Shipping
               </h3>
               <p className="text-gray-600 text-sm sm:text-base">
-                Free delivery on orders above $50
+                Free delivery on orders above ৳50
               </p>
             </div>
 

@@ -4,8 +4,8 @@ const heroProduct = {
   title: "Printed Cotton Taaga Dress",
   description:
     "Premium quality printed cotton dress for kids. Soft, stylish, and perfect for all occasions.",
-  price: "৳ 20.06",
-  oldPrice: "৳ 30.06",
+  price: "৳ 2006",
+  oldPrice: "৳ 3006",
   discount: 33,
   image: "/hero.png",
   images: ["/hero.png", "/hero.png", "/hero.png", "/hero.png"],

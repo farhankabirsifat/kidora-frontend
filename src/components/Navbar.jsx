@@ -2,11 +2,32 @@ import { Search, User, ShoppingCart, Menu, X, Bell, Heart } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import Fuse from "fuse.js";
+import { getAllProducts } from "../utils/fuseProducts";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { cartItemsCount, wishlistItemsCount } = useCart();
+
+  const [searchInput, setSearchInput] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const allProducts = getAllProducts();
+  const fuse = new Fuse(allProducts, {
+    keys: ["title", "description", "brand", "category", "keywords"],
+    threshold: 0.4,
+    distance: 100,
+  });
+  const [mobileSearchInput, setMobileSearchInput] = useState("");
+
+  const handleSearch = (e, inputValue) => {
+    e.preventDefault();
+    if (inputValue.trim()) {
+      navigate(`/search?q=${encodeURIComponent(inputValue.trim())}`);
+      setIsMobileMenuOpen(false);
+      setShowDropdown(false);
+    }
+  };
 
   return (
     <nav className="bg-white shadow-lg border-b border-gray-200 fixed top-0 left-0 w-full z-50">
@@ -24,16 +45,54 @@ const Navbar = () => {
 
           {/* Search Bar - Center positioned */}
           <div className="hidden lg:flex flex-1 max-w-lg mx-8">
-            <div className="relative w-full">
+            <form
+              className="relative w-full"
+              onSubmit={(e) => handleSearch(e, searchInput)}
+            >
               <input
                 type="text"
+                value={searchInput}
+                onChange={(e) => {
+                  setSearchInput(e.target.value);
+                  setShowDropdown(!!e.target.value);
+                }}
                 placeholder="Search for products, brands and more..."
                 className="w-full pl-4 pr-12 py-3 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-gray-50 hover:bg-white transition-colors"
+                autoComplete="off"
+                onFocus={() => setShowDropdown(!!searchInput)}
+                onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
               />
-              <button className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-blue-500 to-blue-600 text-white p-2 rounded-full hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-md">
+              <button
+                type="submit"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-blue-500 to-blue-600 text-white p-2 rounded-full hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-md"
+              >
                 <Search className="w-4 h-4" />
               </button>
-            </div>
+              {showDropdown && searchInput && (
+                <div className="absolute left-0 right-0 top-full mt-2 bg-white border rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                  {fuse
+                    .search(searchInput)
+                    .slice(0, 5)
+                    .map((result) => (
+                      <div
+                        key={result.item.id + result.item.category}
+                        onMouseDown={() => {
+                          navigate(`/product/${result.item.id}`);
+                          setShowDropdown(false);
+                        }}
+                        className="px-4 py-2 cursor-pointer hover:bg-gray-100 text-sm"
+                      >
+                        {result.item.title}
+                      </div>
+                    ))}
+                  {fuse.search(searchInput).length === 0 && (
+                    <div className="px-4 py-2 text-gray-400 text-sm">
+                      No results
+                    </div>
+                  )}
+                </div>
+              )}
+            </form>
           </div>
 
           {/* Desktop Icons */}
@@ -86,7 +145,10 @@ const Navbar = () => {
           {/* Mobile Search and Menu */}
           <div className="lg:hidden flex items-center space-x-2">
             {/* Mobile Search Icon */}
-            <button className="p-2 text-gray-600 hover:text-blue-600 transition-colors">
+            <button
+              className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
+              onClick={() => setIsMobileMenuOpen(true)}
+            >
               <Search className="w-5 h-5" />
             </button>
 
@@ -122,16 +184,24 @@ const Navbar = () => {
           <div className="lg:hidden border-t border-gray-200 bg-white">
             <div className="px-4 pt-4 pb-6 space-y-4">
               {/* Mobile Search */}
-              <div className="relative">
+              <form
+                className="relative"
+                onSubmit={(e) => handleSearch(e, mobileSearchInput)}
+              >
                 <input
                   type="text"
+                  value={mobileSearchInput}
+                  onChange={(e) => setMobileSearchInput(e.target.value)}
                   placeholder="Search for products, brands and more..."
                   className="w-full pl-4 pr-12 py-3 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-gray-50"
                 />
-                <button className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-blue-500 to-blue-600 text-white p-2 rounded-full">
+                <button
+                  type="submit"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-blue-500 to-blue-600 text-white p-2 rounded-full"
+                >
                   <Search className="w-4 h-4" />
                 </button>
-              </div>
+              </form>
 
               {/* Mobile Menu Items */}
               <div className="grid grid-cols-2 gap-4 mt-6">

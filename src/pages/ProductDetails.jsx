@@ -16,6 +16,7 @@ import {
   Check,
 } from "lucide-react";
 import { boysItems, girlsDresses, parentsItems } from "../data/products";
+import heroProduct from "../data/heroProduct";
 import { useCart } from "../context/CartContext";
 
 const ProductDetails = () => {
@@ -43,11 +44,16 @@ const ProductDetails = () => {
     }, 100);
   }, [productId]);
 
-  // Get all products
-  const allProducts = [...boysItems, ...girlsDresses, ...parentsItems];
+  // Get all products and include heroProduct
+  const allProducts = [
+    heroProduct,
+    ...boysItems,
+    ...girlsDresses,
+    ...parentsItems,
+  ];
 
-  // Find the specific product
-  const product = allProducts.find((p) => p.id === parseInt(productId));
+  // Find the specific product (support string or number id)
+  const product = allProducts.find((p) => String(p.id) === String(productId));
 
   if (!product) {
     return (
@@ -113,7 +119,7 @@ const ProductDetails = () => {
     return images.slice(startIndex, startIndex + imagesPerSlide);
   };
 
-  // Related products sliding functionality
+  // Related products sliding functionality (works for hero product too)
   const relatedProductsPerSlide = 4;
   const relatedProducts = allProducts.filter(
     (p) => p.category === product.category && p.id !== product.id

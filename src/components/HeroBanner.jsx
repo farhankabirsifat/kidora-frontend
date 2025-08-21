@@ -1,4 +1,8 @@
+import { useNavigate } from "react-router-dom";
+import heroProduct from "../data/heroProduct";
+
 const HeroBanner = () => {
+  const navigate = useNavigate();
   return (
     <div className="relative bg-gradient-to-br from-blue-500 via-blue-600 to-purple-700 overflow-hidden">
       {/* Animated Background Elements */}
@@ -15,8 +19,8 @@ const HeroBanner = () => {
           <div className="flex-[1.5] flex justify-center lg:justify-start mb-8 lg:mb-0 h-full">
             <div className="relative group h-full w-full">
               <img
-                src="/hero.png"
-                alt="Kids Fashion Hero"
+                src={heroProduct.image}
+                alt={heroProduct.title}
                 className="w-full h-full max-w-[700px] max-h-[650px] object-contain transform group-hover:scale-105 transition-transform duration-500"
               />
             </div>
@@ -35,11 +39,7 @@ const HeroBanner = () => {
             {/* Main Title */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 leading-tight">
               <span className="bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
-                Printed Cotton
-              </span>
-              <br />
-              <span className="text-yellow-300 drop-shadow-lg">
-                Taaga Dress
+                {heroProduct.title}
               </span>
             </h1>
 
@@ -47,7 +47,7 @@ const HeroBanner = () => {
             <div className="flex items-center justify-center lg:justify-start space-x-6 mb-8">
               <div className="text-center">
                 <span className="text-4xl md:text-5xl font-black text-white drop-shadow-lg">
-                  $ 20.06
+                  $ {heroProduct.price}
                 </span>
                 <div className="text-xs text-blue-100 uppercase tracking-wide mt-1">
                   Now
@@ -55,36 +55,40 @@ const HeroBanner = () => {
               </div>
               <div className="text-center opacity-75">
                 <span className="text-2xl text-white line-through">
-                  $ 30.06
+                  $ {heroProduct.oldPrice}
                 </span>
                 <div className="text-xs text-blue-200 uppercase tracking-wide mt-1">
                   Was
                 </div>
               </div>
               <div className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                33% OFF
+                {heroProduct.discount}% OFF
               </div>
             </div>
 
             {/* Features */}
             <div className="flex flex-wrap justify-center lg:justify-start gap-4 mb-8">
-              <div className="flex items-center bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
-                <span className="text-green-300 mr-2">✈️</span>
-                <span className="text-white text-sm font-medium">
-                  FREE SHIPPING WORLDWIDE
-                </span>
-              </div>
-              <div className="flex items-center bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
-                <span className="text-blue-300 mr-2">🛡️</span>
-                <span className="text-white text-sm font-medium">
-                  QUALITY GUARANTEE
-                </span>
-              </div>
+              {heroProduct.features.map((feature, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center bg-white/20 backdrop-blur-sm rounded-full px-4 py-2"
+                >
+                  <span className="text-green-300 mr-2">
+                    {idx === 0 ? "✈️" : "🛡️"}
+                  </span>
+                  <span className="text-white text-sm font-medium">
+                    {feature}
+                  </span>
+                </div>
+              ))}
             </div>
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <button className="group bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
+              <button
+                className="group bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
+                onClick={() => navigate(`/product/${heroProduct.id}`)}
+              >
                 <span className="flex items-center justify-center">
                   🛒 Shop Now
                   <svg
@@ -109,10 +113,11 @@ const HeroBanner = () => {
             <div className="flex items-center justify-center lg:justify-start space-x-6 mt-8 text-white/80">
               <div className="flex items-center">
                 <span className="text-yellow-400 mr-1">⭐⭐⭐⭐⭐</span>
-                <span className="text-sm">4.9/5 Rating</span>
+                <span className="text-sm">{heroProduct.rating}/5 Rating</span>
               </div>
               <div className="text-sm">
-                <span className="font-semibold">1000+</span> Happy Customers
+                <span className="font-semibold">{heroProduct.reviews}+</span>{" "}
+                Happy Customers
               </div>
             </div>
           </div>

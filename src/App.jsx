@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import HomePage from "./pages/HomePage";
 import CategoryPage from "./pages/CategoryPage";
 import ProductDetails from "./pages/ProductDetails";
@@ -13,16 +14,22 @@ function App() {
   return (
     <CartProvider>
       <Router>
-        <div className="min-h-screen bg-gray-50 pt-16">
+        <div className="min-h-screen bg-gray-50 pt-16 flex flex-col">
           <Navbar />
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/category/:categoryName" element={<CategoryPage />} />
-            <Route path="/product/:productId" element={<ProductDetails />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/wishlist" element={<WishlistPage />} />
-            <Route path="/search" element={<SearchPage />} />
-          </Routes>
+          <div className="flex-1">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route
+                path="/category/:categoryName"
+                element={<CategoryPage />}
+              />
+              <Route path="/product/:productId" element={<ProductDetails />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/wishlist" element={<WishlistPage />} />
+              <Route path="/search" element={<SearchPage />} />
+            </Routes>
+          </div>
+          <Footer />
         </div>
       </Router>
     </CartProvider>

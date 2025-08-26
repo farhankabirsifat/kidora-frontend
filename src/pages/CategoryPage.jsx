@@ -5,6 +5,21 @@ import ProductCard from "../components/ProductCard";
 import { boysItems, girlsDresses, parentsItems } from "../data/products";
 
 const CategoryPage = () => {
+  // Banner images for categories
+  const categoryBanners = {
+    women: {
+      image: "/woman-category-banner.png",
+      alt: "Women Category Banner",
+    },
+    men: {
+      image: "/man-category-banner.png",
+      alt: "Men Category Banner",
+    },
+    kids: {
+      image: "/man-category-banner.png",
+      alt: "Kids Category Banner",
+    },
+  };
   const { categoryName } = useParams();
   const navigate = useNavigate();
   const [showFilters, setShowFilters] = useState(false);
@@ -199,6 +214,42 @@ const CategoryPage = () => {
       </div>
 
       {/* Products Grid */}
+      {/* Category Banner below filter/sort section */}
+      {(categoryName?.toLowerCase() === "women" ||
+        categoryName?.toLowerCase() === "men" ||
+        categoryName?.toLowerCase() === "kids") && (
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-2">
+          <div className="relative w-full">
+            <img
+              src={categoryBanners[categoryName?.toLowerCase()].image}
+              alt={categoryBanners[categoryName?.toLowerCase()].alt}
+              className="w-full rounded-lg object-cover sm:max-h-[320px] sm:min-h-[260px] max-h-[200px] min-h-[140px] object-center"
+              style={{ width: "100%", height: "auto", display: "block" }}
+            />
+            <div className="absolute inset-0 flex flex-col items-start justify-center text-left z-10 pl-6 sm:pl-12">
+              <h2
+                className="text-2xl sm:text-4xl font-bold text-yellow-200 drop-shadow-lg"
+                style={{ textShadow: "0 2px 8px rgba(0,0,0,0.18)" }}
+              >
+                {categoryTitle}
+              </h2>
+              <p
+                className="text-base sm:text-lg text-white font-medium mt-1 flex items-center gap-1"
+                style={{ textShadow: "0 2px 8px rgba(0,0,0,0.18)" }}
+              >
+                <span
+                  className="cursor-pointer underline hover:text-yellow-200 transition"
+                  onClick={() => navigate("/")}
+                >
+                  Home
+                </span>
+                <span>&gt;</span>
+                <span>{categoryTitle}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
         {products.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-6">

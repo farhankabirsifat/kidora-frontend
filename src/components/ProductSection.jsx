@@ -18,13 +18,22 @@ const ProductSection = ({
         {isParentSection ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {products.map((product) => (
-              <ParentCard key={product.id} product={product} />
+              <div className="col-span-1 md:col-span-2 w-full" key={product.id}>
+                <ParentCard product={product} />
+              </div>
             ))}
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <div
+                className={`col-span-2 md:col-span-3 lg:col-span-4 w-full${
+                  product.name === "Kids" ? " pl-8" : ""
+                }`}
+                key={product.id}
+              >
+                <ProductCard product={product} />
+              </div>
             ))}
           </div>
         )}

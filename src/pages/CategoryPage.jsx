@@ -141,12 +141,12 @@ const CategoryPage = () => {
                     {products.length} {products.length === 1 ? "item" : "items"}{" "}
                     found
                   </span>
-                  <div className="flex items-center space-x-1">
+                  {/* <div className="flex items-center space-x-1">
                     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                     <span className="text-xs text-green-600 font-medium">
                       Live Inventory
                     </span>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>

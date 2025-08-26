@@ -1,4 +1,4 @@
-import { Search, User, ShoppingCart, Menu, X, Bell, Heart } from "lucide-react";
+import { Search, ShoppingCart, Menu, X, Heart } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
@@ -7,6 +7,7 @@ import { getAllProducts } from "../utils/fuseProducts";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const navigate = useNavigate();
   const { cartItemsCount, wishlistItemsCount } = useCart();
 
@@ -36,9 +37,9 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex-shrink-0">
             <img
-              src="/logo.png"
+              src="/Kidora-logo.png"
               alt="KIDORA"
-              className="h-8 lg:h-10 w-auto cursor-pointer"
+              className="h-10 lg:h-12 w-auto cursor-pointer"
               onClick={() => navigate("/")}
             />
           </div>
@@ -110,14 +111,6 @@ const Navbar = () => {
               )}
             </button>
 
-            {/* Notifications */}
-            <button className="relative p-2 text-gray-600 hover:text-blue-500 transition-colors">
-              <Bell className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center text-[10px]">
-                3
-              </span>
-            </button>
-
             {/* Cart */}
             <button
               onClick={() => navigate("/cart")}
@@ -131,23 +124,18 @@ const Navbar = () => {
               )}
             </button>
 
-            {/* User Profile */}
-            <div className="flex items-center space-x-2 pl-2">
-              <button className="flex items-center space-x-2 p-2 text-gray-700 hover:text-blue-600 transition-colors">
-                <User className="w-5 h-5" />
-                <span className="text-sm font-medium hidden xl:block">
-                  Account
-                </span>
-              </button>
-            </div>
+            {/* User Profile and Notifications removed as requested */}
           </div>
 
           {/* Mobile Search and Menu */}
           <div className="lg:hidden flex items-center space-x-2">
-            {/* Mobile Search Icon */}
+            {/* Mobile Search Icon (opens only search panel) */}
             <button
               className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
-              onClick={() => setIsMobileMenuOpen(true)}
+              onClick={() => {
+                setMobileSearchOpen((s) => !s);
+                setIsMobileMenuOpen(false);
+              }}
             >
               <Search className="w-5 h-5" />
             </button>
@@ -167,7 +155,10 @@ const Navbar = () => {
 
             {/* Mobile Menu Button */}
             <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              onClick={() => {
+                setIsMobileMenuOpen((s) => !s);
+                setMobileSearchOpen(false);
+              }}
               className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
             >
               {isMobileMenuOpen ? (
@@ -179,14 +170,16 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
+        {/* Mobile Search Panel */}
+        {mobileSearchOpen && (
           <div className="lg:hidden border-t border-gray-200 bg-white">
-            <div className="px-4 pt-4 pb-6 space-y-4">
-              {/* Mobile Search */}
+            <div className="px-4 pt-4 pb-2">
               <form
                 className="relative"
-                onSubmit={(e) => handleSearch(e, mobileSearchInput)}
+                onSubmit={(e) => {
+                  handleSearch(e, mobileSearchInput);
+                  setMobileSearchOpen(false);
+                }}
               >
                 <input
                   type="text"
@@ -202,7 +195,14 @@ const Navbar = () => {
                   <Search className="w-4 h-4" />
                 </button>
               </form>
+            </div>
+          </div>
+        )}
 
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden border-t border-gray-200 bg-white">
+            <div className="px-4 pt-4 pb-6 space-y-4">
               {/* Mobile Menu Items */}
               <div className="grid grid-cols-2 gap-4 mt-6">
                 <button
@@ -212,20 +212,6 @@ const Navbar = () => {
                   <Heart className="w-6 h-6 text-red-500" />
                   <span className="text-sm font-medium text-gray-700">
                     Wishlist ({wishlistItemsCount})
-                  </span>
-                </button>
-
-                <button className="flex flex-col items-center space-y-2 p-4 rounded-lg hover:bg-gray-50 transition-colors">
-                  <Bell className="w-6 h-6 text-blue-500" />
-                  <span className="text-sm font-medium text-gray-700">
-                    Notifications
-                  </span>
-                </button>
-
-                <button className="flex flex-col items-center space-y-2 p-4 rounded-lg hover:bg-gray-50 transition-colors">
-                  <User className="w-6 h-6 text-gray-600" />
-                  <span className="text-sm font-medium text-gray-700">
-                    Account
                   </span>
                 </button>
 

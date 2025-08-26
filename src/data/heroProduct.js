@@ -15,5 +15,4 @@ const heroProduct = {
   features: ["FREE SHIPPING WORLDWIDE", "QUALITY GUARANTEE"],
 };
 
-
 export default heroProduct;

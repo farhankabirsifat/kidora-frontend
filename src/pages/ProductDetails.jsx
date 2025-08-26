@@ -55,6 +55,14 @@ const ProductDetails = () => {
   // Find the specific product (support string or number id)
   const product = allProducts.find((p) => String(p.id) === String(productId));
 
+  // Helper for discounted price
+  const getDiscountedPrice = (product) => {
+    if (!product.discount) return product.price;
+    const priceNum = parseFloat(product.price.replace(/[৳$\s]/g, ""));
+    const discounted = Math.round(priceNum * (1 - product.discount / 100));
+    return `৳ ${discounted}`;
+  };
+
   if (!product) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -533,17 +541,18 @@ const ProductDetails = () => {
             <div className="space-y-2">
               <div className="flex items-center space-x-3 md:space-x-4">
                 <span className="text-2xl md:text-3xl font-bold text-gray-900">
-                  {product.price}
+                  {getDiscountedPrice(product)}
                 </span>
-                <span className="text-base md:text-lg text-gray-500 line-through">
-                  ৳
-                  {Math.floor(
-                    parseFloat(product.price.replace(/[৳$\s]/g, "")) * 1.2
-                  )}
-                </span>
-                <span className="bg-red-100 text-red-800 text-xs md:text-sm font-medium px-2 py-1 rounded">
-                  20% OFF
-                </span>
+                {product.discount && (
+                  <span className="text-base md:text-lg text-gray-500 line-through">
+                    {product.price}
+                  </span>
+                )}
+                {product.discount && (
+                  <span className="bg-red-100 text-red-800 text-xs md:text-sm font-medium px-2 py-1 rounded">
+                    {product.discount}% OFF
+                  </span>
+                )}
               </div>
               <p className="text-sm text-green-600">
                 Free shipping on orders above ৳500

@@ -32,6 +32,7 @@ export const boysItems = [
     price: "৳ 567",
     rating: 4.5,
     category: "men",
+    discount: 20,
     image:
       "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=300&h=400&fit=crop&auto=format",
     images: [
@@ -67,6 +68,7 @@ export const boysItems = [
     price: "৳ 650",
     rating: 4.8,
     category: "men",
+    discount: 15,
     image:
       "https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?w=300&h=400&fit=crop&auto=format",
     images: [
@@ -98,6 +100,7 @@ export const boysItems = [
     rating: 4.9,
     reviews: "1000+",
     category: "men",
+    discount: 15,
     image:
       "https://img.drz.lazcdn.com/static/bd/p/978fa994e62cb1d5091796c77d1e415d.jpg_200x200q80.avif",
     images: [
@@ -114,6 +117,7 @@ export const boysItems = [
     rating: 4.5,
     reviews: "1350+",
     category: "men",
+    discount: 10,
     image:
       "https://img.drz.lazcdn.com/static/bd/p/374c0a904869a4fe0f1f720c5a644298.jpg_200x200q80.avif",
     images: [

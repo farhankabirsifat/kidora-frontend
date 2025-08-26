@@ -37,11 +37,25 @@ const ProductCard = ({ product }) => {
     return stars;
   };
 
+  // Calculate discounted price if discount exists
+  const getDiscountedPrice = (product) => {
+    if (!product.discount) return product.price;
+    const priceNum = parseFloat(product.price.replace(/[৳$\s]/g, ""));
+    const discounted = Math.round(priceNum * (1 - product.discount / 100));
+    return `৳ ${discounted}`;
+  };
+
   return (
     <div
       onClick={handleCardClick}
-      className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer"
+      className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer relative"
     >
+      {/* Discount badge */}
+      {product.discount && (
+        <span className="absolute top-2 left-2 bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded z-10">
+          {product.discount}% OFF
+        </span>
+      )}
       <div className="aspect-square overflow-hidden bg-gray-50">
         <img
           src={product.image}
@@ -53,10 +67,15 @@ const ProductCard = ({ product }) => {
         <h3 className="font-medium text-gray-900 mb-2 text-sm leading-tight line-clamp-2">
           {product.title}
         </h3>
-        <div className="mb-3">
+        <div className="mb-3 flex items-center gap-2">
           <span className="text-lg font-bold text-gray-900">
-            {product.price}
+            {getDiscountedPrice(product)}
           </span>
+          {product.discount && (
+            <span className="text-base text-gray-500 line-through">
+              {product.price}
+            </span>
+          )}
         </div>
         {product.rating && (
           <div className="flex items-center space-x-1 mb-2">

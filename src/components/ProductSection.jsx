@@ -26,12 +26,7 @@ const ProductSection = ({
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {products.map((product) => (
-              <div
-                className={`col-span-2 md:col-span-3 lg:col-span-4 w-full${
-                  product.name === "Kids" ? " pl-8" : ""
-                }`}
-                key={product.id}
-              >
+              <div className="w-full" key={product.id}>
                 <ProductCard product={product} />
               </div>
             ))}

@@ -2,6 +2,7 @@ import { Search, ShoppingCart, Menu, X, Heart } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { brandName } from "../utils/brand";
 import Fuse from "fuse.js";
 import { getAllProducts } from "../utils/fuseProducts";
 
@@ -34,14 +35,19 @@ const Navbar = () => {
     <nav className="bg-white shadow-lg border-b border-gray-200 fixed top-0 left-0 w-full z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 lg:h-18">
-          {/* Logo */}
+          {/* Logo / Brand */}
           <div className="flex-shrink-0">
-            <img
-              src="/Kidora-logo.png"
-              alt="KIDORA"
-              className="h-10 lg:h-12 w-auto cursor-pointer"
+            <button
               onClick={() => navigate("/")}
-            />
+              className="cursor-pointer select-none flex items-center"
+              aria-label={brandName}
+            >
+              <img
+                src="/Kidora-logo.png"
+                alt="Kidora Logo"
+                className="h-10 lg:h-14 w-auto object-contain"
+              />
+            </button>
           </div>
 
           {/* Search Bar - Center positioned */}

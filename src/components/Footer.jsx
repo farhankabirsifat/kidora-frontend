@@ -1,4 +1,5 @@
 import { Facebook, Twitter, Instagram, Youtube } from "lucide-react";
+import { brandName, brandDomain } from "../utils/brand";
 
 const Footer = () => {
   return (
@@ -89,8 +90,8 @@ const Footer = () => {
             <div className="space-y-2 text-gray-300">
               <p>📍 Address</p>
               <p>📞 +880 1234567890</p>
-              <p>✉️ info@kidora.com</p>
-              <p>🌐 www.kidora.com</p>
+              <p>✉️ info@{brandDomain}</p>
+              <p>🌐 www.{brandDomain}</p>
             </div>
           </div>
 
@@ -143,7 +144,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; 2025 Kidora. All rights reserved.</p>
+          <p>&copy; 2025 {brandName}. All rights reserved.</p>
         </div>
       </div>
     </footer>

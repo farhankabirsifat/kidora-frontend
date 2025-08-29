@@ -18,6 +18,7 @@ import {
 import { boysItems, girlsDresses, parentsItems } from "../data/products";
 import heroProduct from "../data/heroProduct";
 import { useCart } from "../context/CartContext";
+import { trackViewItem, trackAddToCart } from "../utils/analytics";
 
 const ProductDetails = () => {
   const { productId } = useParams();
@@ -80,6 +81,12 @@ const ProductDetails = () => {
       </div>
     );
   }
+  // Track view_item when product loads
+  useEffect(() => {
+    if (product) {
+      trackViewItem(product);
+    }
+  }, [product]);
 
   const handleQuantityChange = (type) => {
     if (type === "increase") {
@@ -91,6 +98,7 @@ const ProductDetails = () => {
 
   const handleAddToCart = () => {
     addToCart(product, quantity, selectedSize);
+    trackAddToCart(product, quantity, selectedSize);
     setIsAddedToCart(true);
 
     // Reset the success state after 2 seconds

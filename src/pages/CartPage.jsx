@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { trackViewCart, trackBeginCheckout } from "../utils/analytics";
 import {
   ArrowLeft,
   Minus,
@@ -10,6 +11,7 @@ import {
   Truck,
   ShieldCheck,
 } from "lucide-react";
+import { useEffect } from "react";
 
 const CartPage = () => {
   const navigate = useNavigate();
@@ -20,7 +22,6 @@ const CartPage = () => {
     getCartTotal,
     cartItemsCount,
     toggleWishlist,
-    isInWishlist,
   } = useCart();
 
   const handleQuantityChange = (id, selectedSize, currentQuantity, change) => {
@@ -41,6 +42,21 @@ const CartPage = () => {
 
   const shippingCost = getCartTotal() >= 500 ? 0 : 60;
   const finalTotal = getCartTotal() + shippingCost;
+
+  // Track view_cart on mount/update
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      const mapped = cartItems.map((it) => ({
+        item_id: String(it.id),
+        item_name: it.title,
+        item_category: it.category,
+        price: parseFloat(it.price.replace(/[৳$\s]/g, "")) || 0,
+        quantity: it.quantity,
+        item_variant: it.selectedSize,
+      }));
+      trackViewCart(cartItems);
+    }
+  }, [cartItems]);
 
   if (cartItems.length === 0) {
     return (
@@ -135,7 +151,7 @@ const CartPage = () => {
                         {item.title}
                       </h3>
                       <p className="text-sm text-gray-600">
-                        Size: {item.size} | Category: {item.category}
+                        Size: {item.selectedSize} | Category: {item.category}
                       </p>
                     </div>
 
@@ -261,7 +277,16 @@ const CartPage = () => {
 
                 <button
                   onClick={() => {
-                    alert("Proceeding to checkout...");
+                    const items = cartItems.map((it) => ({
+                      item_id: String(it.id),
+                      item_name: it.title,
+                      item_category: it.category,
+                      price: parseFloat(it.price.replace(/[৳$\s]/g, "")) || 0,
+                      quantity: it.quantity,
+                      item_variant: it.selectedSize,
+                    }));
+                    trackBeginCheckout(items, finalTotal);
+                    navigate("/checkout");
                   }}
                   className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200 mt-6"
                 >

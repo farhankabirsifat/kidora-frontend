@@ -33,6 +33,8 @@ export const boysItems = [
     rating: 4.5,
     category: "men",
     discount: 20,
+    description: "This stylish check shirt is perfect for casual and semi-formal occasions. Made from premium cotton fabric, it offers comfort and durability. The classic check pattern adds a timeless appeal to your wardrobe. Features include a regular fit, button-down collar, and long sleeves. Easy to care for and maintains its shape after multiple washes.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=300&h=400&fit=crop&auto=format",
     images: [
@@ -51,6 +53,8 @@ export const boysItems = [
     price: "৳ 445",
     rating: 4.0,
     category: "men",
+    description: "A comfortable casual blue shirt perfect for everyday wear. Made from breathable cotton blend fabric that keeps you cool throughout the day. Features a modern slim fit design with a spread collar and short sleeves. Ideal for casual outings, weekend trips, or relaxed office environments.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=300&h=400&fit=crop&auto=format",
     images: [
@@ -69,6 +73,8 @@ export const boysItems = [
     rating: 4.8,
     category: "men",
     discount: 15,
+    description: "Elegant formal dress shirt designed for professional settings and special occasions. Crafted from high-quality cotton with a crisp finish that maintains its professional appearance all day. Features a classic collar, French cuffs, and a tailored fit that enhances your silhouette. Perfect for business meetings, formal events, and office wear.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?w=300&h=400&fit=crop&auto=format",
     images: [
@@ -84,6 +90,8 @@ export const boysItems = [
     price: "৳ 780",
     rating: 4.6,
     category: "men",
+    description: "Premium quality polo shirt that combines comfort with style. Made from 100% cotton pique fabric with excellent breathability and moisture-wicking properties. Features a classic polo collar with button placket, short sleeves, and a comfortable regular fit. Perfect for golf, casual outings, or smart-casual occasions.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?w=300&h=400&fit=crop&auto=format",
     images: [
@@ -101,6 +109,8 @@ export const boysItems = [
     reviews: "1000+",
     category: "men",
     discount: 15,
+    description: "Trendy short sleeve casual shirt perfect for summer wear. Made from lightweight, breathable fabric that keeps you comfortable in warm weather. Features a modern cut with clean lines and attention to detail. Great for casual outings, beach trips, or everyday wear. Easy to pair with jeans, chinos, or shorts.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://img.drz.lazcdn.com/static/bd/p/978fa994e62cb1d5091796c77d1e415d.jpg_200x200q80.avif",
     images: [
@@ -118,6 +128,8 @@ export const boysItems = [
     reviews: "1350+",
     category: "men",
     discount: 10,
+    description: "Versatile long sleeve casual shirt suitable for all seasons. Crafted from premium cotton blend that offers warmth and comfort. Features a classic button-down design with modern slim fit. Perfect for layering or wearing alone. Ideal for office casual, weekend outings, or travel wear.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://img.drz.lazcdn.com/static/bd/p/374c0a904869a4fe0f1f720c5a644298.jpg_200x200q80.avif",
     images: [
@@ -134,6 +146,8 @@ export const boysItems = [
     rating: 4.6,
     reviews: "1200+",
     category: "men",
+    description: "Ultra-comfortable cotton casual shirt designed for everyday wear. Made from 100% pure cotton with superior softness and breathability. Features reinforced stitching and fade-resistant colors. The relaxed fit provides maximum comfort while maintaining a stylish appearance. Perfect for casual Fridays and weekend activities.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://images.unsplash.com/photo-1564859228273-274232fdb516?w=300&h=400&fit=crop&auto=format",
     images: [
@@ -150,6 +164,8 @@ export const boysItems = [
     rating: 4.9,
     reviews: "1100+",
     category: "men",
+    description: "Sophisticated full sleeve formal shirt crafted for the modern professional. Made from wrinkle-resistant fabric that maintains a crisp appearance all day. Features French seams, mother-of-pearl buttons, and a tailored cut. Perfect for business meetings, formal events, and professional occasions. Available in classic colors.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://img.drz.lazcdn.com/static/bd/p/63971b4b22c11522e3ecad6b3c6ffb70.jpg_200x200q80.avif",
     images: [
@@ -166,6 +182,8 @@ export const boysItems = [
     rating: 5.0,
     reviews: "1700+",
     category: "men",
+    description: "Premium formal wear collection designed for distinguished gentlemen. This exclusive shirt features luxury fabric with exceptional drape and comfort. Hand-finished details include contrast stitching and designer buttons. The perfect choice for important meetings, special occasions, and when you want to make a lasting impression.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://img.drz.lazcdn.com/static/bd/p/0041cba954af07b2627c7c1ea06d8aa2.jpg_200x200q80.avif",
     images: [
@@ -184,6 +202,8 @@ export const boysItems = [
     rating: 4.5,
     reviews: "1300+",
     category: "men",
+    description: "High-quality cotton formal shirt that combines affordability with premium features. Made from 100% cotton with superior stitching and attention to detail. Features a classic collar, full sleeves, and a comfortable regular fit. An excellent choice for formal occasions without breaking the budget.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=400&fit=crop&auto=format",
     images: [
@@ -200,6 +220,8 @@ export const boysItems = [
     rating: 4.6,
     reviews: "2010+",
     category: "men",
+    description: "Trendy fashion-forward long sleeve shirt that keeps you on-trend. Features contemporary design elements with a modern slim fit. Made from comfortable fabric blend that moves with you. Perfect for fashion-conscious individuals who want to stand out. Great for casual dates, social events, or creative workplaces.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://images.unsplash.com/photo-1603252109360-909baaf261c7?w=300&h=400&fit=crop&auto=format",
     images: [
@@ -216,6 +238,8 @@ export const boysItems = [
     rating: 5.0,
     reviews: "1950+",
     category: "men",
+    description: "Stylish denim long sleeve shirt that combines rugged durability with contemporary style. Made from high-quality denim fabric that gets better with age. Features classic denim styling with modern fit and finish. Perfect for casual outings, weekend adventures, or when you want that effortlessly cool look.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=300&h=400&fit=crop&auto=format",
     images: [
@@ -235,6 +259,8 @@ export const girlsDresses = [
     rating: 4.7,
     reviews: "780+",
     category: "women",
+    description: "Beautiful floral summer dress perfect for warm weather occasions. Made from lightweight, breathable fabric with a charming floral print that adds femininity to your look. Features a comfortable fit with adjustable straps and a flattering silhouette. Perfect for picnics, garden parties, or casual summer outings.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=300&h=400&fit=crop&auto=format",
     images: [
@@ -251,6 +277,8 @@ export const girlsDresses = [
     rating: 4.9,
     reviews: "950+",
     category: "women",
+    description: "Stunning elegant party dress designed for special occasions. Features luxurious fabric with intricate detailing and a flattering silhouette that enhances your natural beauty. Perfect for weddings, cocktail parties, and formal events. The timeless design ensures you'll look sophisticated and feel confident.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://img.drz.lazcdn.com/static/bd/p/cf2cb612b67938d87350e7adf7bc26a8.png_200x200q80.avif",
     images: [
@@ -267,6 +295,8 @@ export const girlsDresses = [
     rating: 4.3,
     reviews: "640+",
     category: "women",
+    description: "Comfortable and stylish casual day dress perfect for everyday wear. Made from soft, breathable fabric that keeps you comfortable all day long. Features a relaxed fit with feminine touches that make it suitable for work, shopping, or casual meetups. Easy to dress up or down with accessories.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=300&h=400&fit=crop&auto=format",
     images: [
@@ -283,6 +313,8 @@ export const girlsDresses = [
     rating: 4.5,
     reviews: "720+",
     category: "women",
+    description: "Elegant traditional dress that celebrates cultural heritage with modern comfort. Features authentic design elements and premium fabrics that honor traditional craftsmanship. Perfect for cultural events, festivals, or when you want to embrace your roots while looking sophisticated and elegant.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=300&h=400&fit=crop&auto=format",
     images: [
@@ -299,6 +331,8 @@ export const girlsDresses = [
     rating: 4.8,
     reviews: "850+",
     category: "women",
+    description: "Gorgeous cotton maxi dress that combines comfort with elegance. Made from premium cotton that's breathable and flows beautifully. Features a flattering silhouette that suits all body types. Perfect for summer events, beach vacations, or when you want to feel effortlessly elegant and comfortable all day long.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=300&h=400&fit=crop&auto=format",
     images: [
@@ -315,6 +349,8 @@ export const girlsDresses = [
     rating: 4.6,
     reviews: "920+",
     category: "women",
+    description: "Trendy off-shoulder dress that showcases your feminine style with modern sophistication. Features an elegant off-shoulder design that's both flirty and classy. Made from high-quality fabric with excellent drape and comfort. Perfect for date nights, parties, or any occasion where you want to look stunning and feel confident.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=300&h=400&fit=crop&auto=format",
     images: [
@@ -331,6 +367,8 @@ export const girlsDresses = [
     rating: 4.4,
     reviews: "670+",
     category: "women",
+    description: "Charming vintage-style A-line dress that brings timeless elegance to your wardrobe. Features classic A-line silhouette that flatters every figure. Made with attention to vintage details while maintaining modern comfort. Perfect for vintage-themed events, casual elegance, or when you want to channel retro glamour with contemporary appeal.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=300&h=400&fit=crop&auto=format",
     images: [
@@ -347,6 +385,8 @@ export const girlsDresses = [
     rating: 4.7,
     reviews: "1200+",
     category: "women",
+    description: "Contemporary wrap dress from our exclusive modern collection. Features sophisticated wrap-style design that accentuates your natural curves beautifully. Made from premium fabric with excellent drape and comfort. Versatile piece that transitions perfectly from office to dinner. The ultimate dress for the modern, confident woman.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=300&h=400&fit=crop&auto=format",
     images: [
@@ -366,6 +406,8 @@ export const parentsItems = [
     rating: 4.5,
     reviews: "680+",
     category: "kids",
+    description: "Charming vintage-inspired polka dot dress that brings timeless style to your little one's wardrobe. Made from soft, comfortable fabric with adorable polka dot pattern. Features age-appropriate design with easy-to-wear comfort. Perfect for parties, family gatherings, or special occasions.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=300&h=400&fit=crop&auto=format",
     images: [
@@ -382,6 +424,8 @@ export const parentsItems = [
     rating: 4.7,
     reviews: "450+",
     category: "kids",
+    description: "Adorable baby girl's frock dress designed with love and attention to detail. Made from ultra-soft, skin-friendly fabric that's gentle on delicate skin. Features beautiful design elements that make your little princess look absolutely charming. Perfect for birthdays, family photos, or everyday cuteness.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=300&h=400&fit=crop&auto=format",
     images: [
@@ -398,6 +442,8 @@ export const parentsItems = [
     rating: 4.6,
     reviews: "520+",
     category: "kids",
+    description: "Adorable baby boy's stylish dress set perfect for your little gentleman. Features comfortable, breathable fabrics designed specifically for active toddlers. Includes coordinated pieces that make dressing easy and stylish. Perfect for family photos, special occasions, or when you want your little one to look extra handsome and feel comfortable.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?w=300&h=400&fit=crop&auto=format",
     images: [
@@ -414,6 +460,8 @@ export const parentsItems = [
     rating: 4.4,
     reviews: "380+",
     category: "kids",
+    description: "Fun and stylish t-shirt from our exclusive baby boy's collection. Made from ultra-soft, hypoallergenic cotton that's gentle on sensitive skin. Features playful designs and vibrant colors that kids love. Durable construction stands up to active play and frequent washing. Perfect for everyday adventures and playtime fun.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     image:
       "https://images.unsplash.com/photo-1564859228273-274232fdb516?w=300&h=400&fit=crop&auto=format",
     images: [

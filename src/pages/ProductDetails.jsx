@@ -34,6 +34,11 @@ const ProductDetails = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
   const [isAddedToCart, setIsAddedToCart] = useState(false);
+  // Separate thumbnail drag state to avoid interference with main image / related products
+  const [thumbTouchStart, setThumbTouchStart] = useState(null);
+  const [thumbTouchEnd, setThumbTouchEnd] = useState(null);
+  const [thumbIsDragging, setThumbIsDragging] = useState(false);
+  const [thumbDragOffset, setThumbDragOffset] = useState(0);
 
   // Scroll to top when component mounts or productId changes
   useEffect(() => {
@@ -55,6 +60,107 @@ const ProductDetails = () => {
 
   // Find the specific product (support string or number id)
   const product = allProducts.find((p) => String(p.id) === String(productId));
+
+  // Calculate values that depend on product (but don't use hooks inside)
+  const imagesPerSlide = 4;
+  const totalImages = product?.images ? product.images.length : 4;
+  const maxSlides = Math.ceil(totalImages / imagesPerSlide);
+  
+  const relatedProductsPerSlide = 4;
+  const relatedProducts = product ? allProducts.filter(
+    (p) => p.category === product.category && p.id !== product.id
+  ) : [];
+  const totalRelatedProducts = relatedProducts.length;
+  const maxRelatedSlides =
+    totalRelatedProducts > 0
+      ? Math.ceil(totalRelatedProducts / relatedProductsPerSlide)
+      : 0;
+
+  // Simple slide functions
+  const nextSlide = () => {
+    if (currentSlide < maxSlides - 1) {
+      setCurrentSlide(currentSlide + 1);
+    }
+  };
+
+  const prevSlide = () => {
+    if (currentSlide > 0) {
+      setCurrentSlide(currentSlide - 1);
+    }
+  };
+
+  const nextRelatedSlide = () => {
+    if (relatedProductsSlide < maxRelatedSlides - 1) {
+      setRelatedProductsSlide(relatedProductsSlide + 1);
+    }
+  };
+
+  const prevRelatedSlide = () => {
+    if (relatedProductsSlide > 0) {
+      setRelatedProductsSlide(relatedProductsSlide - 1);
+    }
+  };
+
+  // Track view_item when product loads
+  useEffect(() => {
+    if (product) {
+      trackViewItem(product);
+    }
+  }, [product]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      // Main image gallery navigation
+      if (e.key === "ArrowLeft" && currentSlide > 0) {
+        setCurrentSlide(prev => prev - 1);
+      } else if (e.key === "ArrowRight" && currentSlide < maxSlides - 1) {
+        setCurrentSlide(prev => prev + 1);
+      }
+      // Related products navigation (Shift + Arrow keys)
+      else if (
+        e.shiftKey &&
+        e.key === "ArrowLeft" &&
+        relatedProductsSlide > 0
+      ) {
+        setRelatedProductsSlide(prev => prev - 1);
+      } else if (
+        e.shiftKey &&
+        e.key === "ArrowRight" &&
+        relatedProductsSlide < maxRelatedSlides - 1
+      ) {
+        setRelatedProductsSlide(prev => prev + 1);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [currentSlide, maxSlides, relatedProductsSlide, maxRelatedSlides]);
+
+  // Auto-reset slide when selectedImageIndex changes externally
+  useEffect(() => {
+    const targetSlide = Math.floor(selectedImageIndex / imagesPerSlide);
+    // Only adjust currentSlide if the selected image is outside the visible range
+    const visibleStart = currentSlide * imagesPerSlide;
+    const visibleEnd = visibleStart + imagesPerSlide - 1;
+    if (
+      selectedImageIndex < visibleStart ||
+      selectedImageIndex > visibleEnd
+    ) {
+      setCurrentSlide(targetSlide);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedImageIndex, imagesPerSlide]);
+
+  // Reset related products slide when product changes
+  useEffect(() => {
+    setRelatedProductsSlide(0);
+    setSelectedImageIndex(0);
+    setCurrentSlide(0);
+    setQuantity(1);
+    setSelectedSize("M");
+    setIsAddedToCart(false);
+  }, [product.id]);
 
   // Helper for discounted price
   const getDiscountedPrice = (product) => {
@@ -81,12 +187,6 @@ const ProductDetails = () => {
       </div>
     );
   }
-  // Track view_item when product loads
-  useEffect(() => {
-    if (product) {
-      trackViewItem(product);
-    }
-  }, [product]);
 
   const handleQuantityChange = (type) => {
     if (type === "increase") {
@@ -105,57 +205,6 @@ const ProductDetails = () => {
     setTimeout(() => {
       setIsAddedToCart(false);
     }, 2000);
-  };
-
-  // Image sliding functionality
-  const imagesPerSlide = 4;
-  const totalImages = product.images ? product.images.length : 4;
-  const maxSlides = Math.ceil(totalImages / imagesPerSlide);
-
-  const nextSlide = () => {
-    if (currentSlide < maxSlides - 1) {
-      setCurrentSlide((prev) => prev + 1);
-    }
-  };
-
-  const prevSlide = () => {
-    if (currentSlide > 0) {
-      setCurrentSlide((prev) => prev - 1);
-    }
-  };
-
-  const getVisibleImages = () => {
-    const images = product.images || [
-      product.image,
-      product.image,
-      product.image,
-      product.image,
-    ];
-    const startIndex = currentSlide * imagesPerSlide;
-    return images.slice(startIndex, startIndex + imagesPerSlide);
-  };
-
-  // Related products sliding functionality (works for hero product too)
-  const relatedProductsPerSlide = 4;
-  const relatedProducts = allProducts.filter(
-    (p) => p.category === product.category && p.id !== product.id
-  );
-  const totalRelatedProducts = relatedProducts.length;
-  const maxRelatedSlides =
-    totalRelatedProducts > 0
-      ? Math.ceil(totalRelatedProducts / relatedProductsPerSlide)
-      : 0;
-
-  const nextRelatedSlide = () => {
-    if (relatedProductsSlide < maxRelatedSlides - 1) {
-      setRelatedProductsSlide((prev) => prev + 1);
-    }
-  };
-
-  const prevRelatedSlide = () => {
-    if (relatedProductsSlide > 0) {
-      setRelatedProductsSlide((prev) => prev - 1);
-    }
   };
 
   // Touch handling for mobile sliding - Related products with smooth animation
@@ -226,8 +275,8 @@ const ProductDetails = () => {
     }
 
     const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
 
     const totalImages = product.images ? product.images.length : 1;
 
@@ -244,93 +293,41 @@ const ProductDetails = () => {
     setTouchEnd(null);
   };
 
-  // Touch handling for thumbnail sliding with smooth animation
+  // Touch handling for thumbnail sliding with independent state
   const onThumbnailTouchStart = (e) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-    setIsDragging(true);
-    setDragOffset(0);
+    setThumbTouchEnd(null);
+    setThumbTouchStart(e.targetTouches[0].clientX);
+    setThumbIsDragging(true);
+    setThumbDragOffset(0);
   };
 
   const onThumbnailTouchMove = (e) => {
-    if (!touchStart || !isDragging) return;
-
-    const currentTouch = e.targetTouches[0].clientX;
-    const diff = touchStart - currentTouch;
-    setTouchEnd(currentTouch);
-    setDragOffset(diff);
+    if (!thumbTouchStart || !thumbIsDragging) return;
+    const current = e.targetTouches[0].clientX;
+    const diff = thumbTouchStart - current;
+    setThumbTouchEnd(current);
+    setThumbDragOffset(diff);
   };
 
   const onThumbnailTouchEnd = () => {
-    if (!touchStart || !touchEnd) {
-      setIsDragging(false);
-      setDragOffset(0);
+    if (!thumbTouchStart || !thumbTouchEnd) {
+      setThumbIsDragging(false);
+      setThumbDragOffset(0);
       return;
     }
-
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
-
-    if (isLeftSwipe && currentSlide < maxSlides - 1) {
-      nextSlide();
-    } else if (isRightSwipe && currentSlide > 0) {
-      prevSlide();
+    const distance = thumbTouchStart - thumbTouchEnd;
+    const isLeft = distance > minSwipeDistance;
+    const isRight = distance < -minSwipeDistance;
+    if (isLeft && currentSlide < maxSlides - 1) {
+      setCurrentSlide((s) => s + 1);
+    } else if (isRight && currentSlide > 0) {
+      setCurrentSlide((s) => s - 1);
     }
-
-    // Reset drag states
-    setIsDragging(false);
-    setDragOffset(0);
-    setTouchStart(null);
-    setTouchEnd(null);
+    setThumbIsDragging(false);
+    setThumbDragOffset(0);
+    setThumbTouchStart(null);
+    setThumbTouchEnd(null);
   };
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyPress = (e) => {
-      // Main image gallery navigation
-      if (e.key === "ArrowLeft" && currentSlide > 0) {
-        prevSlide();
-      } else if (e.key === "ArrowRight" && currentSlide < maxSlides - 1) {
-        nextSlide();
-      }
-      // Related products navigation (Shift + Arrow keys)
-      else if (
-        e.shiftKey &&
-        e.key === "ArrowLeft" &&
-        relatedProductsSlide > 0
-      ) {
-        prevRelatedSlide();
-      } else if (
-        e.shiftKey &&
-        e.key === "ArrowRight" &&
-        relatedProductsSlide < maxRelatedSlides - 1
-      ) {
-        nextRelatedSlide();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [currentSlide, maxSlides, relatedProductsSlide, maxRelatedSlides]);
-
-  // Auto-reset slide when selectedImageIndex changes externally
-  useEffect(() => {
-    const targetSlide = Math.floor(selectedImageIndex / imagesPerSlide);
-    if (targetSlide !== currentSlide) {
-      setCurrentSlide(targetSlide);
-    }
-  }, [selectedImageIndex, imagesPerSlide]);
-
-  // Reset related products slide when product changes
-  useEffect(() => {
-    setRelatedProductsSlide(0);
-    setSelectedImageIndex(0);
-    setCurrentSlide(0);
-    setQuantity(1);
-    setSelectedSize("M");
-    setIsAddedToCart(false);
-  }, [product.id]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -437,12 +434,14 @@ const ProductDetails = () => {
                 <div
                   className="flex ease-out"
                   style={{
-                    transform: `translateX(-${currentSlide * 100}%) ${
-                      isDragging ? `translateX(-${dragOffset * 0.3}px)` : ""
+                    transform: `translateX(-${currentSlide * 100}%)${
+                      thumbIsDragging
+                        ? ` translateX(-${thumbDragOffset * 0.3}px)`
+                        : ""
                     }`,
-                    transition: isDragging
+                    transition: thumbIsDragging
                       ? "none"
-                      : "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+                      : "transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1)",
                   }}
                   onTouchStart={onThumbnailTouchStart}
                   onTouchMove={onThumbnailTouchMove}
@@ -508,15 +507,6 @@ const ProductDetails = () => {
                   ))}
                 </div>
               )}
-
-              {/* Debug info - remove in production */}
-              {process.env.NODE_ENV === "development" &&
-                totalImages > imagesPerSlide && (
-                  <div className="mt-2 text-xs text-gray-500 text-center">
-                    Slide {currentSlide + 1} of {maxSlides} | Total images:{" "}
-                    {totalImages}
-                  </div>
-                )}
             </div>
           </div>
 
@@ -669,32 +659,44 @@ const ProductDetails = () => {
             </div>
 
             {/* Product Features */}
-            <div className="space-y-4 pt-6 border-t">
+            <div className="space-y-4 pt-6 border-t border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                <span className="w-6 h-6 bg-gradient-to-r from-green-400 to-blue-500 rounded-full mr-2"></span>
+                Why Choose This Product?
+              </h3>
               <div className="grid grid-cols-1 gap-4">
-                <div className="flex items-center space-x-3">
-                  <Shield className="w-6 h-6 text-green-600" />
+                <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                    <Shield className="w-5 h-5 text-green-600" />
+                  </div>
                   <div>
-                    <p className="font-medium text-gray-900">
+                    <p className="font-semibold text-green-800">
                       Quality Guarantee
                     </p>
-                    <p className="text-sm text-gray-600">
-                      100% authentic products
+                    <p className="text-sm text-green-600">
+                      100% authentic products with premium materials
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <Truck className="w-6 h-6 text-blue-600" />
+                <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                    <Truck className="w-5 h-5 text-blue-600" />
+                  </div>
                   <div>
-                    <p className="font-medium text-gray-900">Fast Delivery</p>
-                    <p className="text-sm text-gray-600">2-3 business days</p>
+                    <p className="font-semibold text-blue-800">Fast Delivery</p>
+                    <p className="text-sm text-blue-600">
+                      Free shipping & 2-3 business days delivery
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <RotateCcw className="w-6 h-6 text-purple-600" />
+                <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
+                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                    <RotateCcw className="w-5 h-5 text-purple-600" />
+                  </div>
                   <div>
-                    <p className="font-medium text-gray-900">Easy Returns</p>
-                    <p className="text-sm text-gray-600">
-                      30-day return policy
+                    <p className="font-semibold text-purple-800">Easy Returns</p>
+                    <p className="text-sm text-purple-600">
+                      Hassle-free 30-day return & exchange policy
                     </p>
                   </div>
                 </div>
@@ -704,25 +706,88 @@ const ProductDetails = () => {
         </div>
 
         {/* Product Description */}
-        <div className="mt-16 bg-white rounded-2xl p-8 shadow-sm">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Product Description
-          </h2>
-          <div className="prose max-w-none">
-            <p className="text-gray-700 leading-relaxed mb-4">
-              {product.title} is crafted with the finest materials and attention
+        <div className="mt-16 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-3xl p-8 shadow-lg border border-blue-200">
+          <div className="flex items-center mb-6">
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mr-4">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Product Description
+            </h2>
+          </div>
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
+            <p className="text-gray-800 leading-relaxed mb-6 text-lg">
+              {product.description || `${product.title} is crafted with the finest materials and attention
               to detail. This premium piece combines comfort, style, and
-              durability to give you the best wearing experience.
+              durability to give you the best wearing experience.`}
             </p>
-            <ul className="space-y-2 text-gray-700">
-              <li>• Premium quality fabric with excellent breathability</li>
-              <li>• Modern fit that suits all body types</li>
-              <li>• Easy care instructions - machine washable</li>
-              <li>• Available in multiple sizes and colors</li>
-              <li>• Perfect for both casual and formal occasions</li>
-            </ul>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                  <span className="text-gray-700 font-medium">Premium quality fabric with excellent breathability</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                  <span className="text-gray-700 font-medium">Modern fit that suits all body types</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
+                  <span className="text-gray-700 font-medium">Easy care instructions - machine washable</span>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
+                  <span className="text-gray-700 font-medium">Available in multiple sizes and colors</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-red-500 rounded-full mr-3"></div>
+                  <span className="text-gray-700 font-medium">Perfect for both casual and formal occasions</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-teal-500 rounded-full mr-3"></div>
+                  <span className="text-gray-700 font-medium">100% satisfaction guarantee</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Product Video */}
+        {product.video && (
+          <div className="mt-16 bg-gradient-to-br from-purple-50 to-pink-100 rounded-3xl p-8 shadow-lg border border-purple-200">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center mr-4">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m2 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Product Video
+              </h2>
+            </div>
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 shadow-sm">
+              <div className="aspect-video rounded-xl overflow-hidden shadow-lg border-2 border-white">
+                <iframe
+                  src={product.video}
+                  title={`${product.title} Product Video`}
+                  className="w-full h-full"
+                  frameBorder="0"
+                  allowFullScreen
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                ></iframe>
+              </div>
+              <div className="mt-4 text-center">
+                <p className="text-gray-600 text-sm">
+                  🎥 Watch this video to see the product in detail and learn more about its features
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Related Products with Mobile Touch Sliding */}
         {totalRelatedProducts > 0 && (
@@ -843,16 +908,6 @@ const ProductDetails = () => {
                 ))}
               </div>
             )}
-
-            {/* Debug info for related products - remove in production */}
-            {process.env.NODE_ENV === "development" &&
-              totalRelatedProducts > relatedProductsPerSlide && (
-                <div className="mt-4 text-xs text-gray-500 text-center">
-                  Related Products: Slide {relatedProductsSlide + 1} of{" "}
-                  {maxRelatedSlides} | Total products: {totalRelatedProducts} |
-                  Category: {product.category}
-                </div>
-              )}
           </div>
         )}
       </div>

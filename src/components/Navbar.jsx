@@ -1,4 +1,4 @@
-import { Search, ShoppingCart, Menu, X, Heart } from "lucide-react";
+import { Search, ShoppingCart, Menu, X, Heart, User } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
@@ -104,6 +104,14 @@ const Navbar = () => {
 
           {/* Desktop Icons */}
           <div className="hidden lg:flex items-center space-x-4">
+            {/* Profile */}
+            <button
+              onClick={() => navigate("/profile")}
+              className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors group"
+              aria-label="Profile"
+            >
+              <User className="w-5 h-5" />
+            </button>
             {/* Wishlist */}
             <button
               onClick={() => navigate("/wishlist")}
@@ -211,6 +219,15 @@ const Navbar = () => {
             <div className="px-4 pt-4 pb-6 space-y-4">
               {/* Mobile Menu Items */}
               <div className="grid grid-cols-2 gap-4 mt-6">
+                <button
+                  onClick={() => navigate("/profile")}
+                  className="flex flex-col items-center space-y-2 p-4 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <User className="w-6 h-6 text-blue-600" />
+                  <span className="text-sm font-medium text-gray-700">
+                    Profile
+                  </span>
+                </button>
                 <button
                   onClick={() => navigate("/wishlist")}
                   className="flex flex-col items-center space-y-2 p-4 rounded-lg hover:bg-gray-50 transition-colors"

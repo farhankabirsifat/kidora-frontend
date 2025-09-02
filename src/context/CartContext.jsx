@@ -2,7 +2,8 @@ import { createContext, useContext, useState, useEffect } from "react";
 
 const CartContext = createContext();
 
-export const useCart = () => {
+// Custom hook to use cart context
+const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
     throw new Error("useCart must be used within a CartProvider");
@@ -10,7 +11,8 @@ export const useCart = () => {
   return context;
 };
 
-export const CartProvider = ({ children }) => {
+// Main CartProvider component
+export default function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState(() => {
     const savedCart = localStorage.getItem("kidora-cart");
     return savedCart ? JSON.parse(savedCart) : [];
@@ -158,4 +160,8 @@ export const CartProvider = ({ children }) => {
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
-};
+}
+
+// Export both useCart hook and CartProvider component
+// eslint-disable-next-line react-refresh/only-export-components
+export { useCart, CartProvider };

@@ -8,7 +8,6 @@ const WishlistPage = () => {
     wishlistItems,
     toggleWishlist,
     addToCart,
-    isInWishlist,
     wishlistItemsCount,
   } = useCart();
 
@@ -125,6 +124,12 @@ const WishlistPage = () => {
                   src={item.image}
                   alt={item.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                  onError={(e) => {
+                    console.log('Image failed to load:', item.image);
+                    // Set a placeholder image if the original fails
+                    e.target.src = 'https://via.placeholder.com/300x400/f3f4f6/9ca3af?text=Image+Not+Found';
+                  }}
                 />
 
                 {/* Remove from Wishlist Button */}

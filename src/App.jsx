@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
 import { OrderProvider } from "./context/OrderContext";
 import Navbar from "./components/Navbar";
@@ -12,33 +12,49 @@ import SearchPage from "./pages/SearchPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import ProfilePage from "./pages/ProfilePage";
 import OrdersPage from "./pages/OrdersPage";
+import AdminLayout from "./admin/AdminLayout";
+import Dashboard from "./admin/pages/Dashboard";
+import Products from "./admin/pages/Products";
+import HeroBanners from "./admin/pages/HeroBanners";
+import AdminOrders from "./admin/pages/Orders";
 import "./App.css";
+
+function AppShell() {
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith('/admin');
+  return (
+    <div className={`min-h-screen bg-gray-50 flex flex-col ${!isAdmin ? 'pt-16' : ''}`}>
+      {!isAdmin && <Navbar />}
+      <div className="flex-1">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/category/:categoryName" element={<CategoryPage />} />
+          <Route path="/product/:productId" element={<ProductDetails />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
+          <Route path="/search" element={<SearchPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="products" element={<Products />} />
+            <Route path="hero" element={<HeroBanners />} />
+            <Route path="orders" element={<AdminOrders />} />
+          </Route>
+        </Routes>
+      </div>
+      {!isAdmin && <Footer />}
+    </div>
+  );
+}
 
 function App() {
   return (
     <CartProvider>
       <OrderProvider>
         <Router>
-          <div className="min-h-screen bg-gray-50 pt-16 flex flex-col">
-            <Navbar />
-            <div className="flex-1">
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route
-                  path="/category/:categoryName"
-                  element={<CategoryPage />}
-                />
-                <Route path="/product/:productId" element={<ProductDetails />} />
-                <Route path="/cart" element={<CartPage />} />
-                <Route path="/checkout" element={<CheckoutPage />} />
-                <Route path="/wishlist" element={<WishlistPage />} />
-                <Route path="/search" element={<SearchPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/orders" element={<OrdersPage />} />
-              </Routes>
-            </div>
-            <Footer />
-          </div>
+          <AppShell />
         </Router>
       </OrderProvider>
     </CartProvider>

@@ -50,17 +50,22 @@ const ProductCard = ({ product }) => {
       onClick={handleCardClick}
       className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer relative"
     >
-      {/* Discount badge */}
-      {product.discount && (
+      {/* Badges */}
+      {product.discount && product.stock !== 0 && (
         <span className="absolute top-2 left-2 bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded z-10">
           {product.discount}% OFF
+        </span>
+      )}
+      {product.stock === 0 && (
+        <span className="absolute top-2 left-2 bg-gray-900/80 backdrop-blur text-white text-[10px] font-semibold px-2 py-1 rounded z-10">
+          OUT OF STOCK
         </span>
       )}
       <div className="aspect-square overflow-hidden bg-gray-50">
         <img
           src={product.image}
           alt={product.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className={`w-full h-full object-cover transition-all duration-300 ${product.stock===0 ? 'opacity-50 grayscale' : 'group-hover:scale-105'}`}
         />
       </div>
       <div className="p-4">

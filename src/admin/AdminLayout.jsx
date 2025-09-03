@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import Button from './components/ui/Button';
 import { useState } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 
 const navItems = [
   { to: '/admin', label: 'Dashboard' },
@@ -12,10 +13,48 @@ const navItems = [
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
+  const sidebarRef = useRef(null);
+
+  // Close on ESC key
+  const handleKey = useCallback((e)=>{
+    if(e.key==='Escape') setSidebarOpen(false);
+  },[]);
+  useEffect(()=>{
+    document.addEventListener('keydown', handleKey);
+    return ()=>document.removeEventListener('keydown', handleKey);
+  },[handleKey]);
+
+  // Body scroll lock for mobile drawer
+  useEffect(()=>{
+    if(typeof document==='undefined') return;
+    if(sidebarOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow='hidden';
+      return ()=>{ document.body.style.overflow=prev; };
+    }
+  },[sidebarOpen]);
+
+  // Click outside to close (mobile)
+  useEffect(()=>{
+    if(!sidebarOpen) return;
+    const handler = (e)=>{
+      if(sidebarRef.current && !sidebarRef.current.contains(e.target)){
+        setSidebarOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return ()=>document.removeEventListener('mousedown', handler);
+  },[sidebarOpen]);
   return (
     <div className="min-h-screen flex bg-gray-100">
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-40 w-60 bg-white border-r border-gray-200 flex flex-col transition-transform duration-300 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+      <div
+        ref={sidebarRef}
+        className={`fixed inset-y-0 left-0 z-40 w-60 bg-white border-r border-gray-200 flex flex-col transition-transform duration-300 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0 shadow-xl' : '-translate-x-full lg:translate-x-0'}`}
+        role="dialog"
+        aria-label="Admin navigation"
+        aria-modal={sidebarOpen}
+      >
         <div className="h-16 flex items-center px-5 border-b border-gray-100">
           <span className="font-extrabold text-xl bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent select-none">Kidora Admin</span>
         </div>
@@ -36,6 +75,9 @@ export default function AdminLayout() {
           <Button variant="outline" className="w-full" onClick={()=>navigate('/')}>Return to Store</Button>
         </div>
       </div>
+      {sidebarOpen && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 lg:hidden" onClick={()=>setSidebarOpen(false)} aria-hidden="true" />
+      )}
       {/* Main */}
       <div className="flex-1 flex flex-col lg:pl-60">
         {/* Topbar */}
@@ -50,14 +92,14 @@ export default function AdminLayout() {
             <h1 className="text-lg font-semibold text-gray-900 hidden sm:block">Admin Dashboard</h1>
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-sm text-right">
-              <p className="font-semibold text-gray-900 leading-tight">Admin User</p>
-              <p className="text-xs text-gray-500">admin@kidora.dev</p>
+            <div className="hidden xs:block text-right">
+              <p className="font-semibold text-gray-900 leading-tight text-sm">Admin User</p>
+              <p className="text-[10px] sm:text-xs text-gray-500">admin@kidora.dev</p>
             </div>
             <Button variant="outline" className="hidden sm:inline-flex">Logout</Button>
           </div>
         </header>
-        <main className="flex-1 p-6 lg:p-10 space-y-8">
+        <main className="flex-1 p-4 sm:p-6 lg:p-10 space-y-8">
           <Outlet />
         </main>
       </div>

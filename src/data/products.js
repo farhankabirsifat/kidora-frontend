@@ -52,7 +52,7 @@ export const boysItems = [
     id: 2,
     title: "Casual Blue Shirt",
     price: "৳ 445",
-  stock: 0,
+  stock: 1,
     rating: 4.0,
     category: "men",
     description: "A comfortable casual blue shirt perfect for everyday wear. Made from breathable cotton blend fabric that keeps you cool throughout the day. Features a modern slim fit design with a spread collar and short sleeves. Ideal for casual outings, weekend trips, or relaxed office environments.",

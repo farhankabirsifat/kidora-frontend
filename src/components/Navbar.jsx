@@ -48,7 +48,7 @@ const Navbar = () => {
   const [mobileSearchInput, setMobileSearchInput] = useState("");
   const [mobileSuggestions, setMobileSuggestions] = useState([]);
   const [loadingMobileSuggest, setLoadingMobileSuggest] = useState(false);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isAdmin } = useAuth();
 
   const handleSearch = (e, inputValue) => {
     e.preventDefault();
@@ -216,6 +216,15 @@ const Navbar = () => {
 
           {/* Desktop Icons */}
           <div className="hidden lg:flex items-center space-x-4">
+            {/* Admin Panel (only for admin accounts) */}
+            {isAdmin && (
+              <button
+                onClick={() => navigate("/admin")}
+                className="px-3 py-1 rounded-full bg-blue-600 text-white text-sm font-semibold hover:shadow transition-colors"
+              >
+                Admin
+              </button>
+            )}
             {/* Profile */}
             <button
               onClick={() => navigate(isAuthenticated ? "/profile" : "/login")}
@@ -395,6 +404,15 @@ const Navbar = () => {
             <div className="px-4 pt-4 pb-6 space-y-4">
               {/* Mobile Menu Items */}
               <div className="grid grid-cols-2 gap-4 mt-6">
+                {/* Admin Panel (only for admin accounts) */}
+                {isAdmin && (
+                  <button
+                    onClick={() => { setIsMobileMenuOpen(false); navigate("/admin"); }}
+                    className="col-span-2 flex flex-col items-center space-y-2 p-4 rounded-lg bg-blue-600 hover:shadow transition-colors border border-purple-200"
+                  >
+                    <span className="text-sm font-semibold text-white">Admin Panel</span>
+                  </button>
+                )}
                 <button
                   onClick={() => navigate(isAuthenticated ? "/profile" : "/login")}
                   className="flex flex-col items-center space-y-2 p-4 rounded-lg hover:bg-gray-50 transition-colors"

@@ -1,11 +1,10 @@
 import { Search, ShoppingCart, Menu, X, Heart, User } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { brandName } from "../utils/brand";
-import Fuse from "fuse.js";
-import { getAllProducts } from "../utils/fuseProducts";
+import { listProducts } from "../services/products";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -15,23 +14,94 @@ const Navbar = () => {
 
   const [searchInput, setSearchInput] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
-  const allProducts = getAllProducts();
-  const fuse = new Fuse(allProducts, {
-    keys: ["title", "description", "brand", "category", "keywords"],
-    threshold: 0.4,
-    distance: 100,
-  });
+  const [suggestions, setSuggestions] = useState([]); // backend products
+  const [loadingSuggest, setLoadingSuggest] = useState(false);
+  const HISTORY_KEY = "kidora_search_history";
+  const getHistory = () => {
+    try {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch {
+      return [];
+    }
+  };
+  const [history, setHistory] = useState(() => getHistory());
+  const saveHistory = (term) => {
+    const t = (term || "").trim();
+    if (!t) return;
+    const prev = getHistory().filter((x) => x.toLowerCase() !== t.toLowerCase());
+    const next = [t, ...prev].slice(0, 10);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+    setHistory(next);
+  };
+  const removeHistoryTerm = (term) => {
+    const t = (term || "").toLowerCase();
+    const next = getHistory().filter((x) => x.toLowerCase() !== t);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+    setHistory(next);
+  };
+  const clearHistory = () => {
+    localStorage.removeItem(HISTORY_KEY);
+    setHistory([]);
+  };
   const [mobileSearchInput, setMobileSearchInput] = useState("");
+  const [mobileSuggestions, setMobileSuggestions] = useState([]);
+  const [loadingMobileSuggest, setLoadingMobileSuggest] = useState(false);
   const { isAuthenticated } = useAuth();
 
   const handleSearch = (e, inputValue) => {
     e.preventDefault();
     if (inputValue.trim()) {
-      navigate(`/search?q=${encodeURIComponent(inputValue.trim())}`);
+      const term = inputValue.trim();
+      navigate(`/search?q=${encodeURIComponent(term)}`);
+      saveHistory(term);
       setIsMobileMenuOpen(false);
       setShowDropdown(false);
     }
   };
+
+  // Desktop: fetch live suggestions (debounced)
+  useEffect(() => {
+    const q = searchInput.trim();
+    if (q.length < 2) { setSuggestions([]); setLoadingSuggest(false); return; }
+    let cancelled = false;
+    setLoadingSuggest(true);
+    const h = setTimeout(async () => {
+      try {
+        const res = await listProducts({ page: 0, size: 8, search: q });
+        if (cancelled) return;
+        const arr = Array.isArray(res) ? res : [];
+        setSuggestions(arr.slice(0, 8));
+      } catch {
+        if (!cancelled) setSuggestions([]);
+      } finally {
+        if (!cancelled) setLoadingSuggest(false);
+      }
+    }, 250);
+    return () => { cancelled = true; clearTimeout(h); };
+  }, [searchInput]);
+
+  // Mobile: fetch live suggestions (debounced)
+  useEffect(() => {
+    const q = mobileSearchInput.trim();
+    if (q.length < 2) { setMobileSuggestions([]); setLoadingMobileSuggest(false); return; }
+    let cancelled = false;
+    setLoadingMobileSuggest(true);
+    const h = setTimeout(async () => {
+      try {
+        const res = await listProducts({ page: 0, size: 8, search: q });
+        if (cancelled) return;
+        const arr = Array.isArray(res) ? res : [];
+        setMobileSuggestions(arr.slice(0, 8));
+      } catch {
+        if (!cancelled) setMobileSuggestions([]);
+      } finally {
+        if (!cancelled) setLoadingMobileSuggest(false);
+      }
+    }, 250);
+    return () => { cancelled = true; clearTimeout(h); };
+  }, [mobileSearchInput]);
 
   return (
     <nav className="bg-white shadow-lg border-b border-gray-200 fixed top-0 left-0 w-full z-50">
@@ -62,12 +132,12 @@ const Navbar = () => {
                 value={searchInput}
                 onChange={(e) => {
                   setSearchInput(e.target.value);
-                  setShowDropdown(!!e.target.value);
+                  setShowDropdown(!!e.target.value || history.length > 0);
                 }}
                 placeholder="Search for products, brands and more..."
                 className="w-full pl-4 pr-12 py-3 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-gray-50 hover:bg-white transition-colors"
                 autoComplete="off"
-                onFocus={() => setShowDropdown(!!searchInput)}
+                onFocus={() => setShowDropdown(!!searchInput || history.length > 0)}
                 onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
               />
               <button
@@ -76,26 +146,67 @@ const Navbar = () => {
               >
                 <Search className="w-4 h-4" />
               </button>
-              {showDropdown && searchInput && (
-                <div className="absolute left-0 right-0 top-full mt-2 bg-white border rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
-                  {fuse
-                    .search(searchInput)
-                    .slice(0, 5)
-                    .map((result) => (
-                      <div
-                        key={result.item.id + result.item.category}
-                        onMouseDown={() => {
-                          navigate(`/product/${result.item.id}`);
-                          setShowDropdown(false);
-                        }}
-                        className="px-4 py-2 cursor-pointer hover:bg-gray-100 text-sm"
-                      >
-                        {result.item.title}
+              {showDropdown && (
+                <div className="absolute left-0 right-0 top-full mt-2 bg-white border rounded-lg shadow-lg z-50 max-h-72 overflow-y-auto">
+                  {/* Product Suggestions */}
+                  {searchInput.trim().length >= 2 && (
+                    <div>
+                      <div className="px-4 pt-3 pb-1 text-xs font-semibold text-gray-500">Products</div>
+                      {loadingSuggest ? (
+                        <div className="px-4 py-2 text-gray-400 text-sm">Searching…</div>
+                      ) : suggestions.length > 0 ? (
+                        suggestions.map((p) => (
+                          <div
+                            key={p.id}
+                            onMouseDown={() => {
+                              navigate(`/product/${p.id}`);
+                              setShowDropdown(false);
+                            }}
+                            className="px-4 py-2 cursor-pointer hover:bg-gray-100 text-sm"
+                          >
+                            {p.title}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="px-4 py-2 text-gray-400 text-sm">No results</div>
+                      )}
+                      <div className="border-t my-2" />
+                    </div>
+                  )}
+                  {/* Recent Searches */}
+                  {history.length > 0 && (
+                    <div>
+                      <div className="px-4 pt-2 pb-1 text-xs font-semibold text-gray-500 flex items-center justify-between">
+                        <span>Recent searches</span>
+                        <button
+                          type="button"
+                          aria-label="Clear search history"
+                          className="p-1 text-gray-400 hover:text-gray-600"
+                          onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); clearHistory(); }}
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
                       </div>
-                    ))}
-                  {fuse.search(searchInput).length === 0 && (
-                    <div className="px-4 py-2 text-gray-400 text-sm">
-                      No results
+                      {history.slice(0, 5).map((term, i) => (
+                        <div
+                          key={term + i}
+                          onMouseDown={() => {
+                            navigate(`/search?q=${encodeURIComponent(term)}`);
+                            setShowDropdown(false);
+                          }}
+                          className="px-4 py-2 cursor-pointer hover:bg-gray-100 text-sm flex items-center justify-between gap-2"
+                        >
+                          <span className="truncate">{term}</span>
+                          <button
+                            type="button"
+                            aria-label={`Remove ${term} from history`}
+                            className="p-1 text-gray-300 hover:text-gray-600"
+                            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); removeHistoryTerm(term); }}
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -210,6 +321,70 @@ const Navbar = () => {
                   <Search className="w-4 h-4" />
                 </button>
               </form>
+              {/* Mobile Suggestions Panel */}
+              {(mobileSearchInput.trim().length >= 2 || history.length > 0) && (
+                <div className="mt-3 bg-white border rounded-lg shadow max-h-72 overflow-y-auto">
+                  {mobileSearchInput.trim().length >= 2 && (
+                    <div>
+                      <div className="px-4 pt-3 pb-1 text-xs font-semibold text-gray-500">Products</div>
+                      {loadingMobileSuggest ? (
+                        <div className="px-4 py-2 text-gray-400 text-sm">Searching…</div>
+                      ) : mobileSuggestions.length > 0 ? (
+                        mobileSuggestions.map((p) => (
+                          <div
+                            key={p.id}
+                            onMouseDown={() => {
+                              navigate(`/product/${p.id}`);
+                              setMobileSearchOpen(false);
+                            }}
+                            className="px-4 py-2 cursor-pointer hover:bg-gray-100 text-sm"
+                          >
+                            {p.title}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="px-4 py-2 text-gray-400 text-sm">No results</div>
+                      )}
+                      <div className="border-t my-2" />
+                    </div>
+                  )}
+                  {history.length > 0 && (
+                    <div>
+                      <div className="px-4 pt-2 pb-1 text-xs font-semibold text-gray-500 flex items-center justify-between">
+                        <span>Recent searches</span>
+                        <button
+                          type="button"
+                          aria-label="Clear search history"
+                          className="p-1 text-gray-400 hover:text-gray-600"
+                          onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); clearHistory(); }}
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                      {history.slice(0, 5).map((term, i) => (
+                        <div
+                          key={term + i}
+                          onMouseDown={() => {
+                            navigate(`/search?q=${encodeURIComponent(term)}`);
+                            setMobileSearchOpen(false);
+                          }}
+                          className="px-4 py-2 cursor-pointer hover:bg-gray-100 text-sm flex items-center justify-between gap-2"
+                        >
+                          <span className="truncate">{term}</span>
+                          <button
+                            type="button"
+                            aria-label={`Remove ${term} from history`}
+                            className="p-1 text-gray-300 hover:text-gray-600"
+                            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); removeHistoryTerm(term); }}
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}

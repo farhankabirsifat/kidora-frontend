@@ -19,7 +19,7 @@ const SearchPage = () => {
     const tokens = q.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
     const aliases = new Map(
       [
-        ["men", ["men", "man", "mens", "men's"]],
+        ["men", ["men", "man", "mans", "mens", "men's"]],
         ["women", ["women", "woman", "womens", "women's", "lady", "ladies", "female", "females"]],
         ["kid", ["kid", "kids", "child", "children"]], // use stem 'kid' for inclusive match
         ["boy", ["boy", "boys"]],

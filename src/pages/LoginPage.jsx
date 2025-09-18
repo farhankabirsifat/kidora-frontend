@@ -26,6 +26,11 @@ export default function LoginPage() {
   return (
     <div className="py-16">
       <div className="max-w-md mx-auto bg-white shadow rounded-2xl p-8 border border-gray-100">
+        <div className="pb-6 flex justify-center">
+          <Link to="/" aria-label="Go to homepage">
+            <img src="/Kidora-logo.png" alt="Kidora" className="h-18 cursor-pointer" />
+          </Link>
+        </div>
         <h1 className="text-2xl font-bold mb-6">Welcome back</h1>
         {error && <div className="mb-4 p-3 rounded bg-red-50 text-sm text-red-700">{error}</div>}
         <form onSubmit={handleSubmit} className="space-y-4">

@@ -24,29 +24,51 @@ import HeroBanners from "./admin/pages/HeroBanners";
 import AdminOrders from "./admin/pages/Orders";
 import "./App.css";
 
+// Route guards
+function PrivateRoute({ children }) {
+  const { isAuthenticated, loading } = useAuth();
+  if (loading) return null;
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+}
+
+function PublicRoute({ children }) {
+  const { isAuthenticated, loading } = useAuth();
+  if (loading) return null;
+  return !isAuthenticated ? children : <Navigate to="/" replace />;
+}
+
+function AdminRoute({ children }) {
+  const { isAdmin: isAdminUser, loading } = useAuth();
+  if (loading) return null;
+  return isAdminUser ? children : <Navigate to="/admin/login" replace />;
+}
+
 function AppShell() {
   const location = useLocation();
-  const isAdmin = location.pathname.startsWith('/admin');
-  const { isAuthenticated, loading, isAdmin: isAdminUser } = useAuth();
+  const pathname = location.pathname;
+  const isAdmin = pathname.startsWith('/admin');
+  const isAuthPage = pathname === '/login' || pathname === '/signup';
+  const { loading } = useAuth();
   if (loading) return null;
   return (
-    <div className={`min-h-screen bg-gray-50 flex flex-col ${!isAdmin ? 'pt-16' : ''}`}>
-      {!isAdmin && <Navbar />}
+    <div className={`min-h-screen bg-gray-50 flex flex-col ${!isAdmin && !isAuthPage ? 'pt-16' : ''}`}>
+      {/* Header area: show Navbar on normal pages; for auth pages show centered logo */}
+      {!isAdmin && !isAuthPage && <Navbar />}
       <div className="flex-1">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/category/:categoryName" element={<CategoryPage />} />
           <Route path="/product/:productId" element={<ProductDetails />} />
           <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/checkout" element={<PrivateRoute><CheckoutPage /></PrivateRoute>} />
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/search" element={<SearchPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/profile" element={isAuthenticated ? <ProfilePage /> : <Navigate to="/login" replace />} />
-          <Route path="/orders" element={isAuthenticated ? <OrdersPage /> : <Navigate to="/login" replace />} />
+          <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+          <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
+          <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+          <Route path="/orders" element={<PrivateRoute><OrdersPage /></PrivateRoute>} />
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={isAdminUser ? <AdminLayout /> : <Navigate to="/admin/login" replace />}>
+          <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
             <Route index element={<Dashboard />} />
             <Route path="products" element={<Products />} />
             <Route path="hero" element={<HeroBanners />} />
@@ -54,7 +76,7 @@ function AppShell() {
           </Route>
         </Routes>
       </div>
-      {!isAdmin && <Footer />}
+      {!isAdmin && !isAuthPage && <Footer />}
     </div>
   );
 }

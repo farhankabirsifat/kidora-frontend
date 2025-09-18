@@ -199,79 +199,139 @@ export default function Orders() {
   const printInvoice = (o) => {
     if (!o) return;
     const fmt = (n) => `৳ ${Number(n || 0).toFixed(0)}`;
-    const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleString() : new Date().toLocaleString();
-    const rows = (o.items || []).map(it => `
+    const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleDateString() : new Date().toLocaleDateString();
+    const timeStr = o.createdAt ? new Date(o.createdAt).toLocaleTimeString() : new Date().toLocaleTimeString();
+    const items = Array.isArray(o.items) ? o.items : [];
+    const subtotal = items.reduce((s, it) => s + (it.price || 0) * (it.qty || 0), 0);
+    const inferredTax = Math.max((o.total || subtotal) - subtotal, 0);
+    const taxRatePct = subtotal > 0 ? Math.round((inferredTax / subtotal) * 100) : 0;
+    const tax = inferredTax;
+    const grandTotal = subtotal + tax;
+
+    const rows = items.map((it, idx) => `
       <tr>
-        <td style="padding:8px;border:1px solid #e5e7eb">${it.title || ''}${it.selectedSize ? ` (Size: ${it.selectedSize})` : ''}</td>
-        <td style="padding:8px;border:1px solid #e5e7eb;text-align:right">${it.qty}</td>
-        <td style="padding:8px;border:1px solid #e5e7eb;text-align:right">${fmt(it.price)}</td>
-        <td style="padding:8px;border:1px solid #e5e7eb;text-align:right">${fmt((it.price||0)*(it.qty||0))}</td>
+        <td class="cell center">${idx + 1}</td>
+        <td class="cell">${(it.title || '').replace(/</g,'&lt;').replace(/>/g,'&gt;')}${it.selectedSize ? ` <span style='color:#6b7280'>(Size: ${String(it.selectedSize).replace(/</g,'&lt;').replace(/>/g,'&gt;')})</span>` : ''}</td>
+        <td class="cell center">${it.qty}</td>
+        <td class="cell num">${fmt(it.price)}</td>
+        <td class="cell num">${fmt((it.price||0)*(it.qty||0))}</td>
       </tr>`).join('');
+
     const html = `<!DOCTYPE html>
     <html>
     <head>
       <meta charset="utf-8"/>
       <title>Invoice ${o.id}</title>
       <style>
-        @media print { .no-print { display: none; } }
-        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color:#111827; }
-        .container { max-width: 800px; margin: 20px auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 12px; }
-        h1 { font-size: 20px; margin: 0 0 4px; }
-        .muted { color:#6b7280; font-size:12px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
-        table { width:100%; border-collapse: collapse; margin-top: 16px; }
-        th { background:#f9fafb; text-align:left; padding:8px; border:1px solid #e5e7eb; font-weight:600; }
+  :root { --blue:#2563eb; --blue-dark:#1d4ed8; --text:#111827; --muted:#6b7280; }
+        * { box-sizing: border-box; }
+        @media print { .no-print { display: none !important; } }
+        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: var(--text); margin:0; }
+        .wrapper { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+        .card { background:#fff; border:1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+        .header { display:flex; justify-content:space-between; align-items:flex-start; padding: 24px; }
+        .logo { display:flex; align-items:center; gap:12px; }
+        .logo img { height: 42px; }
+        .title { text-align:right; }
+        .title h1 { margin:0; font-size: 28px; letter-spacing:0.5px; color: var(--blue-dark); }
+        .title .site { color:#6b7280; font-size: 12px; }
+        .divider { height: 3px; background: var(--blue); margin: 0 24px; border-radius: 2px; }
+        .meta { display:flex; justify-content:space-between; gap:24px; padding: 20px 24px; }
+        .meta .left .label { color: var(--muted); font-size:12px; }
+        .meta .left .name { font-size:20px; font-weight: 700; margin: 2px 0; }
+        .meta .left .muted { color: var(--muted); font-size: 12px; }
+        .meta .right { text-align:right; }
+        .meta .right .row { font-size: 12px; color: #374151; }
+  table { width: calc(100% - 48px); border-collapse: collapse; margin: 12px 24px 0 24px; border: 2px solid var(--blue); border-radius:8px; overflow:hidden; }
+  thead th { background: var(--blue); color:#fff; padding: 10px; font-weight:700; font-size:12px; border-right: 2px solid var(--blue); }
+  thead th:last-child { border-right: 0; }
+  tbody td { font-size: 13px; }
+  tbody td + td { border-left: 2px solid var(--blue); }
+  tbody tr:first-child td { border-top: 2px solid var(--blue); }
+  tbody tr td { border-bottom: 1px solid #e5e7eb; }
+  tbody tr:last-child td { border-bottom: 0; }
+  .cell { padding:10px; }
+  .num { text-align:right; font-variant-numeric: tabular-nums; }
+  .center { text-align:center; }
+        tfoot td { font-size: 13px; }
+        .totals { margin: 0 24px 16px 24px; }
+        .totals .row { display:flex; justify-content:flex-end; gap: 24px; }
+        .totals .row .label { color:#374151; }
+        .totals .row .value { min-width: 140px; text-align: right; font-weight:600; }
+        .pay-and-grand { display:flex; justify-content:space-between; align-items:center; gap:24px; margin: 16px 24px 0 24px; }
+        .pay-badge { background: var(--blue); color:#fff; padding: 10px 14px; font-weight:700; border-radius:6px; font-size: 12px; }
+        .grand { background: var(--blue); color:#fff; padding: 12px 16px; font-weight:800; border-radius:6px; min-width: 220px; text-align:right; }
+        .grand .label { opacity:0.9; margin-right: 12px; }
+        .bank { padding: 12px 24px; font-size: 12px; color:#374151; }
+        .thanks { padding: 8px 24px; font-weight:600; font-size: 13px; }
+        .terms { padding: 0 24px 16px 24px; font-size: 12px; color: var(--muted); }
+        .footer { display:flex; justify-content:space-between; align-items:center; gap:12px; padding: 10px 24px 20px 24px; color:#374151; font-size: 12px; }
+        .footer .item { display:flex; align-items:center; gap:8px; }
+        .printbar { padding: 10px 24px 20px; text-align:right }
+        .btn-print { padding:8px 12px; border:1px solid #111827; border-radius:8px; background:#111827; color:#fff; cursor:pointer }
       </style>
     </head>
     <body>
-      <div class="container">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px">
-          <div>
-            <h1>Kidora - Invoice</h1>
-            <div class="muted">Order ${o.id}</div>
-            <div class="muted">Date: ${dateStr}</div>
+      <div class="wrapper">
+        <div class="card">
+          <div class="header">
+            <div class="logo">
+              <img src="/Kidora-logo.png" alt="Kidora" />
+            </div>
+            <div class="title">
+              <h1>INVOICE</h1>
+              <div class="site">kidora.com.bd</div>
+            </div>
           </div>
-          <div style="text-align:right">
-            <div><strong>Total:</strong> ${fmt(o.total)}</div>
-            <div class="muted">Status: ${o.status}</div>
-            <div class="muted">Payment: ${o.paymentStatus || '-'}</div>
+          <div class="divider"></div>
+          <div class="meta">
+            <div class="left">
+              <div class="label">Invoice to :</div>
+              <div class="name">${(o.customer || 'Customer Name').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+              <div class="muted">Mobile : ${(o.phone || '000000000').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+              <div class="muted">Address : ${(o.address || '123 Anywhere St., Any City').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+            </div>
+            <div class="right">
+              <div class="row"><strong>Invoice no :</strong> ${(o.id || '').toString().replace('#','')}</div>
+              <div class="row">${dateStr} ${timeStr}</div>
+            </div>
           </div>
-        </div>
-        <div class="grid">
-          <div>
-            <div style="font-weight:600;margin-top:8px">Customer Details</div>
-            <div>${o.customer || ''}</div>
-            <div class="muted">${o.phone || ''}</div>
-            <div class="muted">${o.address || ''}</div>
+          <table>
+            <thead>
+              <tr>
+                <th class="center" style="width:8%">NO</th>
+                <th style="width:52%">DESCRIPTION</th>
+                <th class="center" style="width:10%">QTY</th>
+                <th class="num" style="width:15%">PRICE</th>
+                <th class="num" style="width:15%">TOTAL</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows || `<tr><td colspan=5 style='padding:10px;border:1px solid #e5e7eb;text-align:center;color:#6b7280'>No items</td></tr>`}
+            </tbody>
+          </table>
+          <div class="totals">
+            <div class="row" style="margin-top:8px"><div class="label">Sub Total :</div><div class="value">${fmt(subtotal)}</div></div>
+            <div class="row"><div class="label">Tax ${taxRatePct ? taxRatePct + '%' : ''} :</div><div class="value">${fmt(tax)}</div></div>
           </div>
-          <div>
-            <div style="font-weight:600;margin-top:8px">Payment</div>
-            <div>Method: ${o.method === 'online' ? 'Online' : 'Cash on Delivery'}</div>
-            ${o.method === 'online' ? `<div>Provider: ${o.paymentProvider || '-'}</div>` : ''}
-            ${o.method === 'online' ? `<div>Sender: ${o.senderNumber || '-'}</div>` : ''}
-            ${o.method === 'online' ? `<div>Transaction ID: ${o.transactionId || '-'}</div>` : ''}
+          <div class="pay-and-grand">
+            <div class="pay-badge">PAYMENT METHOD : ${o.method === 'online' ? 'Online' : 'Cash on Delivery'}</div>
+            <div class="grand"><span class="label">GRAND TOTAL :</span> ${fmt(grandTotal)}</div>
           </div>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th style="text-align:right">Qty</th>
-              <th style="text-align:right">Price</th>
-              <th style="text-align:right">Subtotal</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rows}
-            <tr>
-              <td colspan="3" style="padding:8px;border:1px solid #e5e7eb;text-align:right;font-weight:600">Total</td>
-              <td style="padding:8px;border:1px solid #e5e7eb;text-align:right;font-weight:700">${fmt(o.total)}</td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="muted" style="margin-top:16px">Thank you for shopping with Kidora.</div>
-        <div class="no-print" style="margin-top:16px">
-          <button onclick="window.print()" style="padding:8px 12px;border:1px solid #111827;border-radius:8px;background:#111827;color:#fff">Print</button>
+          <div class="thanks">Thank you for business with us!</div>
+          <div class="terms">
+            <div style="font-weight:600;margin-bottom:4px">Term and Conditions :</div>
+            <div>Please send payment within 30 days of receiving this invoice. Late payments may incur charges.</div>
+          </div>
+          <div class="divider" style="height:2px;margin-top:8px"></div>
+          <div class="footer">
+            <div class="item">📞 123-456-7890</div>
+            <div class="item">✉️ hello@kidora.com.bd</div>
+            <div class="item">📍 123 Anywhere St., Any City</div>
+          </div>
+          <div class="printbar no-print">
+            <button class="btn-print" onclick="window.print()">Print</button>
+          </div>
         </div>
       </div>
     </body>

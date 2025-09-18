@@ -260,27 +260,49 @@ export default function CartProvider({ children }) {
       alert("Please login to add items to your cart.");
       return;
     }
+    // Compute absolute target quantity to send to server
+    let targetQuantity = quantity;
     setCartItems((prevItems) => {
       const existingItem = prevItems.find(
         (item) => item.id === product.id && item.selectedSize === selectedSize
       );
-
       if (existingItem) {
-        const next = prevItems.map((item) =>
+        targetQuantity = existingItem.quantity + quantity;
+        return prevItems.map((item) =>
           item.id === product.id && item.selectedSize === selectedSize
-            ? { ...item, quantity: item.quantity + quantity }
+            ? { ...item, quantity: targetQuantity }
             : item
         );
-        // Sync backend
-        const updated = next.find(i => i.id === product.id && i.selectedSize === selectedSize);
-        if (updated) addOrUpdateCartItem({ productId: product.id, selectedSize, quantity: updated.quantity }).catch(()=>{});
-        return next;
       }
-
-      const next = [
+      const ui = mapProductOutToUi(product);
+      const discounted = computeDiscountedAmount(ui.price, ui.discount);
+      return [
         ...prevItems,
-        (() => {
-          const ui = mapProductOutToUi(product);
+        {
+          id: ui.id,
+          title: ui.title,
+          image: ui.image,
+          price: `৳ ${discounted.toFixed(0)}`,
+          originalPrice: `৳ ${parseMoney(ui.price).toFixed(0)}`,
+          discountPercent: ui.discount || 0,
+          category: ui.category,
+          quantity: targetQuantity,
+          selectedSize,
+          addedAt: new Date().toISOString(),
+        },
+      ];
+    });
+
+    try {
+      await addOrUpdateCartItem({ productId: product.id, selectedSize, quantity: targetQuantity });
+      // After server confirms, refresh cart from server to ensure single source of truth
+      const cart = await apiGetCart();
+      const cartItemsArr = Array.isArray(cart.items) ? cart.items : [];
+      const cartProducts = await Promise.all(cartItemsArr.map(i => getProductById(i.productId).catch(() => null)));
+      const cartUi = cartItemsArr.map((ci, idx) => {
+        const p = cartProducts[idx];
+        if (p) {
+          const ui = mapProductOutToUi(p);
           const discounted = computeDiscountedAmount(ui.price, ui.discount);
           return {
             id: ui.id,
@@ -290,15 +312,29 @@ export default function CartProvider({ children }) {
             originalPrice: `৳ ${parseMoney(ui.price).toFixed(0)}`,
             discountPercent: ui.discount || 0,
             category: ui.category,
-            quantity,
-            selectedSize,
-            addedAt: new Date().toISOString(),
+            selectedSize: ci.selectedSize,
+            quantity: ci.quantity,
           };
-        })(),
-      ];
-      addOrUpdateCartItem({ productId: product.id, selectedSize, quantity }).catch(()=>{});
-      return next;
-    });
+        }
+        return {
+          id: ci.productId,
+          title: `Product #${ci.productId}`,
+          image: "",
+          price: `৳ 0`,
+          originalPrice: `৳ 0`,
+          discountPercent: 0,
+          category: "",
+          selectedSize: ci.selectedSize,
+          quantity: ci.quantity,
+        };
+      });
+  setCartItems(cartUi);
+    } catch (e) {
+      // On failure, reload from server to correct any mismatch
+      try {
+        await loadFromServer();
+      } catch {}
+    }
   };
 
   const removeFromCart = (productId, selectedSize) => {
@@ -315,7 +351,11 @@ export default function CartProvider({ children }) {
 
     setCartItems((prevItems) => prevItems.map((item) => item.id === productId && item.selectedSize === selectedSize ? { ...item, quantity } : item));
     const basic = getBasicCreds();
-    if (basic) addOrUpdateCartItem({ productId, selectedSize, quantity }).catch(()=>{});
+    if (basic) {
+      addOrUpdateCartItem({ productId, selectedSize, quantity })
+        .then(() => loadFromServer())
+        .catch(() => loadFromServer());
+    }
   };
 
   const clearCart = () => {

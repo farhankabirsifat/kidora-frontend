@@ -51,7 +51,6 @@ const Navbar = () => {
               />
             </button>
           </div>
-
           {/* Search Bar - Center positioned */}
           <div className="hidden lg:flex flex-1 max-w-lg mx-8">
             <form

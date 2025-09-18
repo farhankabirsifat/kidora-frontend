@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Filter, SortAsc, X } from "lucide-react";
+import { Filter, SortAsc, X } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import ProductCard from "../components/ProductCard";
 import { listProductsByCategory, listCategories, mapProductOutToUi } from "../services/products";
@@ -114,101 +114,7 @@ const CategoryPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between py-4 space-y-3 md:space-y-0">
-            <div className="flex flex-col md:flex-row md:items-center md:space-x-6">
-              <button
-                onClick={() => navigate("/")}
-                className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors duration-200 group"
-              >
-                <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
-                <span className="font-medium text-sm sm:text-base">
-                  Back to Home
-                </span>
-              </button>
-              <div className="hidden md:block h-8 w-px bg-gray-200"></div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
-                  {categoryTitle}
-                  <span className="text-blue-600 ml-2">Collection</span>
-                </h1>
-                <div className="flex flex-wrap items-center gap-3 mt-2">
-                  <span className="text-sm text-gray-500 font-medium">
-                    {loading ? 'Loading...' : error ? 'Error' : `${products.length} ${products.length === 1 ? 'item' : 'items'} found`}
-                  </span>
-                  {/* <div className="flex items-center space-x-1">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-xs text-green-600 font-medium">
-                      Live Inventory
-                    </span>
-                  </div> */}
-                </div>
-              </div>
-            </div>
-
-            {/* Buttons */}
-            <div className="flex items-center w-full">
-              <div className="flex items-center space-x-2 sm:space-x-3 flex-1 md:justify-end">
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center space-x-2 px-4 py-2 border rounded-lg transition-all duration-200 font-medium text-sm sm:text-base ${
-                    showFilters
-                      ? "bg-blue-50 border-blue-300 text-blue-700 shadow-md"
-                      : "border-gray-300 hover:bg-gray-50 hover:border-gray-400 text-gray-700"
-                  }`}
-                >
-                  <Filter className="w-4 h-4" />
-                  <span>Filter</span>
-                </button>
-                <button
-                  onClick={() => setShowSort(!showSort)}
-                  className={`flex items-center space-x-2 px-4 py-2 border rounded-lg transition-all duration-200 font-medium text-sm sm:text-base ${
-                    showSort
-                      ? "bg-purple-50 border-purple-300 text-purple-700 shadow-md"
-                      : "border-gray-300 hover:bg-gray-50 hover:border-gray-400 text-gray-700"
-                  }`}
-                >
-                  <SortAsc className="w-4 h-4" />
-                  <span>Sort</span>
-                </button>
-              </div>
-              {/* Show Clear All only if any filter/sort is active */}
-              {(filters.priceRange !== "all" ||
-                filters.rating !== "all" ||
-                filters.sortBy !== "default") && (
-                <button
-                  onClick={() =>
-                    setFilters({
-                      priceRange: "all",
-                      rating: "all",
-                      sortBy: "default",
-                    })
-                  }
-                  className="ml-2 text-xs flex items-center gap-1 text-blue-500 hover:text-white hover:bg-blue-500 px-2 py-1 rounded-full font-semibold transition-colors duration-150 focus:outline-none shadow-sm"
-                  style={{ border: "none", background: "none" }}
-                >
-                  <svg
-                    className="w-3.5 h-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6 6l8 8M6 14L14 6"
-                    />
-                  </svg>
-                  Clear All
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Poster/Banner */}
 
       {/* Products Grid */}
       {/* Category Banner below filter/sort section */}
@@ -247,6 +153,52 @@ const CategoryPage = () => {
           </div>
         </div>
       )}
+      {/* Sticky Filter/Sort toolbar below banner */}
+      <div className="sticky top-16 z-30 bg-white/90 backdrop-blur border-b">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-2 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex items-center space-x-2 px-3 sm:px-4 py-2 border rounded-lg transition-all duration-200 font-medium text-sm ${
+                showFilters
+                  ? "bg-blue-50 border-blue-300 text-blue-700 shadow-md"
+                  : "border-gray-300 hover:bg-gray-50 hover:border-gray-400 text-gray-700"
+              }`}
+            >
+              <Filter className="w-4 h-4" />
+              <span>Filter</span>
+            </button>
+            <button
+              onClick={() => setShowSort(!showSort)}
+              className={`flex items-center space-x-2 px-3 sm:px-4 py-2 border rounded-lg transition-all duration-200 font-medium text-sm ${
+                showSort
+                  ? "bg-purple-50 border-purple-300 text-purple-700 shadow-md"
+                  : "border-gray-300 hover:bg-gray-50 hover:border-gray-400 text-gray-700"
+              }`}
+            >
+              <SortAsc className="w-4 h-4" />
+              <span>Sort</span>
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs sm:text-sm text-gray-600 font-medium">
+              {loading ? 'Loading...' : error ? 'Error' : `${products.length} ${products.length === 1 ? 'item' : 'items'}`}
+            </span>
+            {(filters.priceRange !== "all" || filters.rating !== "all" || filters.sortBy !== "default") && (
+              <button
+                onClick={() => setFilters({ priceRange: 'all', rating: 'all', sortBy: 'default' })}
+                className="text-[11px] sm:text-xs flex items-center gap-1 text-blue-600 hover:text-white hover:bg-blue-600 px-2 py-1 rounded-full font-semibold transition-colors duration-150"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 20 20">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l8 8M6 14L14 6" />
+                </svg>
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
         {error && (
           <div className="text-center py-12 text-red-600 font-medium">{error}</div>
@@ -256,7 +208,7 @@ const CategoryPage = () => {
         )}
         {!loading && !error && products.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-6">
-            {products.map(product => (
+            {products.map((product) => (
               <div key={product.id} className="p-1 sm:p-2">
                 <ProductCard product={product} />
               </div>
@@ -267,7 +219,6 @@ const CategoryPage = () => {
           <div className="text-center py-12 text-gray-500">No products found in this category.</div>
         )}
       </div>
-
       {/* Filter Popup */}
       {showFilters && (
         <div className="fixed inset-0 z-50">
@@ -278,7 +229,7 @@ const CategoryPage = () => {
           />
           {/* Popup next to Filter button on desktop, centered on mobile */}
           <div
-            className="absolute md:top-[84px] md:right-12 top-1/2 left-1/2 md:left-auto md:translate-x-0 md:-translate-y-0 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-xs sm:max-w-sm bg-white rounded-xl shadow-2xl border p-6 animate-scaleFadeIn"
+            className="absolute md:top-28 md:right-12 top-1/2 left-1/2 md:left-auto md:translate-x-0 md:-translate-y-0 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-xs sm:max-w-sm bg-white rounded-xl shadow-2xl border p-6 animate-scaleFadeIn"
             style={{
               transition:
                 "transform 0.25s cubic-bezier(.4,0,.2,1), opacity 0.25s",
@@ -392,7 +343,7 @@ const CategoryPage = () => {
           />
           {/* Popup next to Sort button on desktop, centered on mobile */}
           <div
-            className="absolute md:top-[84px] md:right-2 top-1/2 left-1/2 md:left-auto md:translate-x-0 md:-translate-y-0 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-xs sm:max-w-sm bg-white rounded-xl shadow-2xl border p-6 animate-scaleFadeIn"
+            className="absolute md:top-28 md:right-2 top-1/2 left-1/2 md:left-auto md:translate-x-0 md:-translate-y-0 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-xs sm:max-w-sm bg-white rounded-xl shadow-2xl border p-6 animate-scaleFadeIn"
             style={{
               transition:
                 "transform 0.25s cubic-bezier(.4,0,.2,1), opacity 0.25s",

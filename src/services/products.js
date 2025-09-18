@@ -36,7 +36,7 @@ export async function listCategoryCounts() {
   return apiClient.get(`${base}/category-counts`);
 }
 
-export async function createProduct({ title, description, price, category, rating = 0, discount = 0, mainImageFile, imageFiles = [], sizes } = {}) {
+export async function createProduct({ title, description, price, category, rating = 0, discount = 0, mainImageFile, imageFiles = [], sizes, video } = {}) {
   const basic = getBasicCreds();
   const fd = new FormData();
   fd.append('title', title);
@@ -48,12 +48,13 @@ export async function createProduct({ title, description, price, category, ratin
   if (sizes && typeof sizes === 'object') {
     try { fd.append('sizes_stock', JSON.stringify(sizes)); } catch {}
   }
+  if (video) fd.append('video', video);
   fd.append('mainImage', mainImageFile);
   for (const f of imageFiles) fd.append('images', f);
   return apiClient.post(`${base}/admin`, fd, { auth: { basic } });
 }
 
-export async function updateProduct(id, { title, description, price, category, rating, discount, mainImageFile, imageFiles, sizes } = {}) {
+export async function updateProduct(id, { title, description, price, category, rating, discount, mainImageFile, imageFiles, sizes, video } = {}) {
   const basic = getBasicCreds();
   const fd = new FormData();
   if (title !== undefined) fd.append('title', title);
@@ -65,6 +66,7 @@ export async function updateProduct(id, { title, description, price, category, r
   if (sizes && typeof sizes === 'object') {
     try { fd.append('sizes_stock', JSON.stringify(sizes)); } catch {}
   }
+  if (video !== undefined) fd.append('video', video ?? '');
   if (mainImageFile) fd.append('main_image', mainImageFile);
   if (Array.isArray(imageFiles)) {
     for (const f of imageFiles) fd.append('images', f);
@@ -95,6 +97,7 @@ export function mapProductOutToUi(p) {
     description: p.description,
     rating: p.rating ?? 0,
     discount: p.discount ?? 0,
+    video: p.video || '',
     sizes: p.sizes_stock || null,
     image: toFullUrl(primary),
     images: images.map(toFullUrl),

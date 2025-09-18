@@ -13,6 +13,8 @@ const WishlistPage = () => {
 
   const handleAddToCart = (item) => {
     addToCart(item, 1, "M"); // Default quantity 1 and size M
+    // Also remove from wishlist when adding to cart from wishlist page
+    toggleWishlist(item);
   };
 
   const handleRemoveFromWishlist = (item) => {
@@ -96,13 +98,16 @@ const WishlistPage = () => {
             <div className="flex space-x-3">
               <button
                 onClick={() => {
-                  wishlistItems.forEach((item) => addToCart(item, 1, "M"));
-                  alert("All items added to cart!");
+                  wishlistItems.forEach((item) => {
+                    addToCart(item, 1, "M");
+                    toggleWishlist(item);
+                  });
+                  alert("All items moved to cart!");
                 }}
                 className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
               >
                 <ShoppingCart className="w-4 h-4" />
-                <span>Add All to Cart</span>
+                <span>Move All to Cart</span>
               </button>
             </div>
           </div>
@@ -128,7 +133,7 @@ const WishlistPage = () => {
                   onError={(e) => {
                     console.log('Image failed to load:', item.image);
                     // Set a placeholder image if the original fails
-                    e.target.src = 'https://via.placeholder.com/300x400/f3f4f6/9ca3af?text=Image+Not+Found';
+                    e.currentTarget.src = 'https://via.placeholder.com/300x400/f3f4f6/9ca3af?text=Image+Not+Found';
                   }}
                 />
 
@@ -189,10 +194,7 @@ const WishlistPage = () => {
                     {item.price}
                   </span>
                   <span className="text-sm text-gray-500 line-through">
-                    ৳
-                    {Math.floor(
-                      parseFloat(item.price.replace(/[৳$\s]/g, "")) * 1.2
-                    )}
+                    {item.originalPrice || ''}
                   </span>
                 </div>
 

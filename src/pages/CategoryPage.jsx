@@ -1,8 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Filter, SortAsc, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import ProductCard from "../components/ProductCard";
-import { boysItems, girlsDresses, parentsItems } from "../data/products";
+import { listProductsByCategory, listCategories, mapProductOutToUi } from "../services/products";
 
 const CategoryPage = () => {
   // Banner images for categories
@@ -29,81 +29,79 @@ const CategoryPage = () => {
     rating: "all",
     sortBy: "default",
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [rawProducts, setRawProducts] = useState([]);
+  const [page] = useState(0); // reserved for future pagination
+  const [size] = useState(100);
+  const [availableCategories, setAvailableCategories] = useState([]);
 
-  const getProductsByCategory = () => {
-    switch (categoryName?.toLowerCase()) {
-      case "women":
-        return girlsDresses;
-      case "men":
-        return boysItems;
-      case "kids":
-        return parentsItems;
-      default:
-        return [];
+  // Fetch distinct categories once (optional use)
+  useEffect(() => {
+    listCategories()
+      .then(cats => setAvailableCategories(cats))
+      .catch(()=>{});
+  }, []);
+
+  useEffect(() => {
+    let cat = categoryName?.toLowerCase();
+    // For kids category include girls and boys as well
+    if (cat === 'kids') {
+      // Use stems to include singular/plural and compounds: kid/kids, girl/girls, boy/boys, child/children
+      cat = ['kid','girl','boy','child'];
     }
-  };
-
-  const getFilteredProducts = () => {
-    let filteredProducts = getProductsByCategory();
-
-    if (filters.priceRange !== "all") {
-      filteredProducts = filteredProducts.filter((product) => {
-        const price = parseFloat(product.price.replace(/[৳$\s]/g, ""));
-        switch (filters.priceRange) {
-          case "under-500":
-            return price < 500;
-          case "500-1000":
-            return price >= 500 && price <= 1000;
-          case "over-1000":
-            return price > 1000;
-          default:
-            return true;
+    if (!cat) return;
+    setLoading(true); setError("");
+  listProductsByCategory(cat, { page, size })
+      .then(data => {
+        const mapped = data.map(mapProductOutToUi);
+        // Deduplicate by id (array could have overlaps across categories)
+        const unique = [];
+        const seen = new Set();
+        for (const p of mapped) {
+          if (!seen.has(p.id)) { seen.add(p.id); unique.push(p); }
         }
+        setRawProducts(unique);
+      })
+      .catch(e => setError(e?.message || 'Failed to load products'))
+      .finally(() => setLoading(false));
+  }, [categoryName, page, size]);
+
+  const products = useMemo(() => {
+    let list = [...rawProducts];
+    if (filters.priceRange !== 'all') {
+      list = list.filter(p => {
+        const priceNum = parseFloat(String(p.price).replace(/[৳$\s]/g, '')) || 0;
+        if (filters.priceRange === 'under-500') return priceNum < 500;
+        if (filters.priceRange === '500-1000') return priceNum >= 500 && priceNum <= 1000;
+        if (filters.priceRange === 'over-1000') return priceNum > 1000;
+        return true;
       });
     }
-
-    if (filters.rating !== "all") {
-      filteredProducts = filteredProducts.filter((product) => {
-        const rating = product.rating;
-        switch (filters.rating) {
-          case "4-plus":
-            return rating >= 4;
-          case "4.5-plus":
-            return rating >= 4.5;
-          case "5":
-            return rating === 5;
-          default:
-            return true;
-        }
+    if (filters.rating !== 'all') {
+      list = list.filter(p => {
+        const r = p.rating || 0;
+        if (filters.rating === '4-plus') return r >= 4;
+        if (filters.rating === '4.5-plus') return r >= 4.5;
+        if (filters.rating === '5') return r === 5;
+        return true;
       });
     }
-
     switch (filters.sortBy) {
-      case "price-low":
-        filteredProducts.sort((a, b) => {
-          const priceA = parseFloat(a.price.replace(/[৳$\s]/g, ""));
-          const priceB = parseFloat(b.price.replace(/[৳$\s]/g, ""));
-          return priceA - priceB;
-        });
+      case 'price-low':
+        list.sort((a,b)=> (parseFloat(String(a.price).replace(/[৳$\s]/g, ''))||0) - (parseFloat(String(b.price).replace(/[৳$\s]/g, ''))||0));
         break;
-      case "price-high":
-        filteredProducts.sort((a, b) => {
-          const priceA = parseFloat(a.price.replace(/[৳$\s]/g, ""));
-          const priceB = parseFloat(b.price.replace(/[৳$\s]/g, ""));
-          return priceB - priceA;
-        });
+      case 'price-high':
+        list.sort((a,b)=> (parseFloat(String(b.price).replace(/[৳$\s]/g, ''))||0) - (parseFloat(String(a.price).replace(/[৳$\s]/g, ''))||0));
         break;
-      case "rating":
-        filteredProducts.sort((a, b) => b.rating - a.rating);
+      case 'rating':
+        list.sort((a,b)=> (b.rating||0) - (a.rating||0));
         break;
       default:
         break;
     }
-
-    return filteredProducts;
-  };
-
-  const products = getFilteredProducts();
+    return list;
+  }, [rawProducts, filters]);
   const categoryTitle =
     categoryName?.charAt(0).toUpperCase() + categoryName?.slice(1);
 
@@ -138,8 +136,7 @@ const CategoryPage = () => {
                 </h1>
                 <div className="flex flex-wrap items-center gap-3 mt-2">
                   <span className="text-sm text-gray-500 font-medium">
-                    {products.length} {products.length === 1 ? "item" : "items"}{" "}
-                    found
+                    {loading ? 'Loading...' : error ? 'Error' : `${products.length} ${products.length === 1 ? 'item' : 'items'} found`}
                   </span>
                   {/* <div className="flex items-center space-x-1">
                     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
@@ -251,23 +248,23 @@ const CategoryPage = () => {
         </div>
       )}
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
-        {products.length > 0 ? (
+        {error && (
+          <div className="text-center py-12 text-red-600 font-medium">{error}</div>
+        )}
+        {loading && !error && (
+          <div className="text-center py-12 text-gray-500 animate-pulse">Loading products…</div>
+        )}
+        {!loading && !error && products.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-6">
-            {products.map((product) => (
+            {products.map(product => (
               <div key={product.id} className="p-1 sm:p-2">
                 <ProductCard product={product} />
               </div>
             ))}
           </div>
-        ) : (
-          <div className="text-center py-12">
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
-              No Products Found
-            </h3>
-            <p className="text-gray-500 text-sm sm:text-base">
-              Sorry, we couldn't find any products in this category.
-            </p>
-          </div>
+        )}
+        {!loading && !error && products.length === 0 && (
+          <div className="text-center py-12 text-gray-500">No products found in this category.</div>
         )}
       </div>
 

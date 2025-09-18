@@ -1,12 +1,32 @@
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
+import { useEffect, useState } from 'react';
+import { apiClient } from '../../services/apiClient';
+import { getBasicCreds } from '../../services/auth';
 
 export default function Dashboard() {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [overview, setOverview] = useState({ users: 0, products: 0, orders: 0, revenue: 0 });
+
+  useEffect(() => {
+    (async () => {
+      setError(''); setLoading(true);
+      try {
+        const basic = getBasicCreds();
+        const data = await apiClient.get('/api/admin/dashboard/overview', { auth: { basic } });
+        setOverview(data);
+      } catch (e) {
+        setError(e?.message || 'Failed to load overview');
+      } finally { setLoading(false); }
+    })();
+  }, []);
+
   const stats = [
-    { label: 'Total Orders', value: 1284, change: '+12% this week', color: 'blue' },
-    { label: 'Pending Orders', value: 47, change: '-5% this week', color: 'amber' },
-    { label: 'Revenue (৳)', value: '4,56,320', change: '+8% this week', color: 'emerald' },
-    { label: 'Products In Stock', value: 312, change: '+3 new', color: 'indigo' },
+    { label: 'Total Orders', value: overview.orders, change: '', color: 'blue' },
+    { label: 'Users', value: overview.users, change: '', color: 'amber' },
+    { label: 'Revenue (৳)', value: overview.revenue, change: '', color: 'emerald' },
+    { label: 'Products', value: overview.products, change: '', color: 'indigo' },
   ];
   return (
     <div className="space-y-8">
@@ -29,7 +49,11 @@ export default function Dashboard() {
           <CardTitle>Sales Overview</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-56 flex items-center justify-center text-sm text-gray-400">Chart Placeholder</div>
+          {loading && <div className="text-sm text-gray-500">Loading…</div>}
+          {error && <div className="text-sm text-red-600">{error}</div>}
+          {!loading && !error && (
+            <div className="h-56 flex items-center justify-center text-sm text-gray-400">Chart Placeholder</div>
+          )}
         </CardContent>
       </Card>
     </div>

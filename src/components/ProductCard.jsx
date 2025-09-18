@@ -37,12 +37,22 @@ const ProductCard = ({ product }) => {
     return stars;
   };
 
+  // Utilities to format prices that may be number or string
+  const toNumber = (val) => {
+    if (typeof val === 'number') return val;
+    if (typeof val === 'string') {
+      const n = parseFloat(val.replace(/[৳$\s,]/g, ''));
+      return isNaN(n) ? 0 : n;
+    }
+    return 0;
+  };
+  const fmt = (n) => `৳ ${Number(n || 0).toFixed(0)}`;
   // Calculate discounted price if discount exists
-  const getDiscountedPrice = (product) => {
-    if (!product.discount) return product.price;
-    const priceNum = parseFloat(product.price.replace(/[৳$\s]/g, ""));
-    const discounted = Math.round(priceNum * (1 - product.discount / 100));
-    return `৳ ${discounted}`;
+  const getDiscountedPrice = (p) => {
+    const base = toNumber(p.price);
+    if (!p.discount) return fmt(base);
+    const discounted = Math.round(base * (1 - p.discount / 100));
+    return fmt(discounted);
   };
 
   return (
@@ -78,7 +88,7 @@ const ProductCard = ({ product }) => {
           </span>
           {product.discount && (
             <span className="text-base text-gray-500 line-through">
-              {product.price}
+              {fmt(toNumber(product.price))}
             </span>
           )}
         </div>

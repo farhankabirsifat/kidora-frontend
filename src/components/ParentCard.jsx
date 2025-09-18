@@ -24,7 +24,7 @@ const ParentCard = ({ product }) => {
           </div>
           <div className="flex items-center justify-between">
             <span className="text-lg font-bold text-blue-600">
-              {product.price}
+              ৳ {Number((typeof product.price === 'number' ? product.price : String(product.price).replace(/[৳$\s,]/g, '')) || 0).toFixed(0)}
             </span>
             <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors text-sm">
               Add to Cart

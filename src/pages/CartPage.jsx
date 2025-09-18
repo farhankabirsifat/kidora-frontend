@@ -138,6 +138,10 @@ const CartPage = () => {
                       src={item.image}
                       alt={item.title}
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                      onError={(e) => {
+                        console.log('Cart image failed:', item.image);
+                        e.currentTarget.src = 'https://via.placeholder.com/300x300/f3f4f6/9ca3af?text=No+Image';
+                      }}
                     />
                   </div>
 

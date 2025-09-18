@@ -1,5 +1,6 @@
 import { Search, ShoppingCart, Menu, X, Heart, User } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { brandName } from "../utils/brand";
@@ -21,6 +22,7 @@ const Navbar = () => {
     distance: 100,
   });
   const [mobileSearchInput, setMobileSearchInput] = useState("");
+  const { isAuthenticated } = useAuth();
 
   const handleSearch = (e, inputValue) => {
     e.preventDefault();
@@ -106,7 +108,7 @@ const Navbar = () => {
           <div className="hidden lg:flex items-center space-x-4">
             {/* Profile */}
             <button
-              onClick={() => navigate("/profile")}
+              onClick={() => navigate(isAuthenticated ? "/profile" : "/login")}
               className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors group"
               aria-label="Profile"
             >
@@ -220,12 +222,12 @@ const Navbar = () => {
               {/* Mobile Menu Items */}
               <div className="grid grid-cols-2 gap-4 mt-6">
                 <button
-                  onClick={() => navigate("/profile")}
+                  onClick={() => navigate(isAuthenticated ? "/profile" : "/login")}
                   className="flex flex-col items-center space-y-2 p-4 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   <User className="w-6 h-6 text-blue-600" />
                   <span className="text-sm font-medium text-gray-700">
-                    Profile
+                    {isAuthenticated ? 'Profile' : 'Login'}
                   </span>
                 </button>
                 <button

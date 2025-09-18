@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { ArrowLeft, ShoppingBag } from "lucide-react";
 import { trackBeginCheckout, trackPurchase } from "../utils/analytics";
+import { createUserOrder } from "../services/orders";
 import { useOrders } from "../context/useOrders";
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { cartItems, getCartTotal, clearCart } = useCart();
   const { addOrder } = useOrders();
 
@@ -29,26 +31,37 @@ const CheckoutPage = () => {
     rocket: { label: 'Rocket', number: '01610000003', instructions: 'Send Money (Personal)' },
   };
 
-  const shippingCost = getCartTotal() >= 500 ? 0 : 60;
-  const finalTotal = getCartTotal() + shippingCost;
+  // Support Buy-Now flow via route state
+  const isBuyNow = Boolean(location.state?.buyNow && location.state?.item);
+  const buyNowItem = location.state?.item;
+  const displayedItems = useMemo(() => (isBuyNow && buyNowItem ? [buyNowItem] : cartItems), [isBuyNow, buyNowItem, cartItems]);
+
+  const parseMoney = (val) => {
+    if (typeof val === 'number') return val;
+    const n = parseFloat(String(val || '').replace(/[৳$\s]/g, ""));
+    return Number.isFinite(n) ? n : 0;
+  };
+  const subtotal = useMemo(() => displayedItems.reduce((sum, it) => sum + parseMoney(it.price) * (it.quantity || 1), 0), [displayedItems]);
+  const shippingCost = subtotal >= 500 ? 0 : 60;
+  const finalTotal = subtotal + shippingCost;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.fullName || !form.phone || !form.address || !form.city) {
       alert("Please fill in all required fields.");
       return;
     }
-    const items = cartItems.map((it) => ({
+    const items = displayedItems.map((it) => ({
       item_id: String(it.id),
       item_name: it.title,
       item_category: it.category,
-      price: parseFloat(it.price.replace(/[৳$\s]/g, "")) || 0,
-      quantity: it.quantity,
+      price: parseMoney(it.price) || 0,
+      quantity: it.quantity || 1,
       item_variant: it.selectedSize,
     }));
     if (paymentMethod === 'online') {
@@ -65,61 +78,52 @@ const CheckoutPage = () => {
         return;
       }
     }
-    const orderId = "ORD-" + Date.now().toString().slice(-6);
-    // Create order object for context
-    addOrder({
-      id: orderId,
-      date: new Date().toISOString().split("T")[0],
-      status: paymentMethod === 'cod' ? 'processing' : 'processing',
-      total: finalTotal,
-      items: cartItems.map(it => ({ id: it.id, title: it.title, qty: it.quantity, price: parseFloat(it.price.replace(/[৳$\s]/g, "")) || 0 })),
-      tracking: {
-        steps: [
-          { key: 'processing', label: 'Processing', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
-          { key: 'packed', label: 'Packed', time: null },
-          { key: 'shipped', label: 'Shipped', time: null },
-          { key: 'out_for_delivery', label: 'Out for Delivery', time: null },
-          { key: 'delivered', label: 'Delivered', time: null },
-        ],
-        current: 'processing'
-      },
-      payment: {
-        method: paymentMethod,
-        provider: paymentProvider || null,
-        status: paymentMethod === 'cod' ? 'pending' : 'pending_verification',
+    try {
+      // Build backend payload for order creation
+      const payload = {
+        items: displayedItems.map(it => ({ productId: it.id, quantity: it.quantity || 1, selectedSize: it.selectedSize, price: parseMoney(it.price) })),
+        shippingAddress: {
+          name: form.fullName,
+          phone: form.phone,
+          street: form.address,
+          city: form.city,
+          state: '',
+          zipCode: form.postalCode || '',
+          country: 'Bangladesh',
+        },
+        paymentMethod: paymentMethod,
+        totalAmount: finalTotal,
+        paymentProvider: paymentMethod === 'online' ? paymentProvider : null,
         senderNumber: paymentMethod === 'online' ? senderNumber : null,
-        transactionId: paymentMethod === 'online' ? transactionId : null
-      },
-      shipping: {
-        name: form.fullName,
-        phone: form.phone,
-        address: form.address,
-        city: form.city,
-        postalCode: form.postalCode,
-        notes: form.notes
-      }
-    });
-    trackPurchase(orderId, items, finalTotal);
-    clearCart();
-    alert("Order placed successfully!" + (paymentMethod === 'cod' ? " Pay with cash upon delivery." : " Payment received."));
-    navigate('/orders');
+        transactionId: paymentMethod === 'online' ? transactionId : null,
+      };
+      const created = await createUserOrder(payload);
+      // Add the server-created order directly; OrderContext will map it properly
+      addOrder(created);
+      trackPurchase(String(created.id), items, finalTotal);
+      if (!isBuyNow) clearCart();
+      alert("Order placed successfully!" + (paymentMethod === 'cod' ? " Pay with cash upon delivery." : " We'll verify your payment."));
+      navigate('/orders');
+    } catch (err) {
+      alert(err?.message || 'Failed to place order');
+    }
   };
   // Ensure begin_checkout tracked if user lands directly here
   useEffect(() => {
-    if (cartItems.length > 0) {
-      const items = cartItems.map((it) => ({
+    if (displayedItems.length > 0) {
+      const items = displayedItems.map((it) => ({
         item_id: String(it.id),
         item_name: it.title,
         item_category: it.category,
-        price: parseFloat(it.price.replace(/[৳$\s]/g, "")) || 0,
-        quantity: it.quantity,
+        price: parseMoney(it.price) || 0,
+        quantity: it.quantity || 1,
         item_variant: it.selectedSize,
       }));
       trackBeginCheckout(items, finalTotal);
     }
-  }, [cartItems, finalTotal]);
+  }, [displayedItems, finalTotal]);
 
-  if (cartItems.length === 0) {
+  if (!isBuyNow && cartItems.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -344,19 +348,17 @@ const CheckoutPage = () => {
 
               <div className="space-y-4">
                 <div className="space-y-3 max-h-64 overflow-auto pr-1">
-                  {cartItems.map((item) => (
+                  {displayedItems.map((item) => (
                     <div key={`${item.id}-${item.selectedSize}`} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <img src={item.image} alt={item.title} className="w-12 h-12 rounded object-cover" />
                         <div>
                           <p className="text-sm font-medium text-gray-900 line-clamp-1">{item.title}</p>
-                          <p className="text-xs text-gray-600">Size: {item.selectedSize} × {item.quantity}</p>
+                          <p className="text-xs text-gray-600">Size: {item.selectedSize} × {item.quantity || 1}</p>
                         </div>
                       </div>
                       <div className="text-sm font-semibold text-gray-900">
-                        ৳{(
-                          parseFloat(item.price.replace(/[৳$\s]/g, "")) * item.quantity
-                        ).toFixed(0)}
+                        ৳{(parseMoney(item.price) * (item.quantity || 1)).toFixed(0)}
                       </div>
                     </div>
                   ))}
@@ -364,7 +366,7 @@ const CheckoutPage = () => {
 
                 <div className="flex justify-between text-gray-600 pt-2">
                   <span>Subtotal</span>
-                  <span>৳{getCartTotal()}</span>
+                  <span>৳{subtotal.toFixed(0)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Shipping</span>

@@ -3,10 +3,19 @@ import { Package, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const statusColors = {
+  pending: "bg-gray-100 text-gray-700",
   processing: "bg-amber-100 text-amber-700",
+  packed: "bg-purple-100 text-purple-700",
   shipped: "bg-blue-100 text-blue-700",
+  out_for_delivery: "bg-indigo-100 text-indigo-700",
   delivered: "bg-green-100 text-green-700",
   cancelled: "bg-red-100 text-red-700",
+};
+
+const paymentColors = {
+  pending: "bg-amber-50 text-amber-700 border border-amber-200",
+  paid: "bg-green-50 text-green-700 border border-green-200",
+  refunded: "bg-blue-50 text-blue-700 border border-blue-200",
 };
 
 export default function OrdersPage() {
@@ -31,8 +40,11 @@ export default function OrdersPage() {
                 <p className="font-semibold text-gray-900">{order.id}</p>
                 <p className="text-xs text-gray-500 mt-0.5">Placed on {order.date} • {order.items.length} items</p>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 flex-wrap">
                 <span className={`px-3 py-1 text-xs font-medium rounded-full ${statusColors[order.status]}`}>{order.status}</span>
+                {order.paymentStatus && (
+                  <span className={`px-3 py-1 text-xs font-medium rounded-full ${paymentColors[order.paymentStatus]}`}>{order.paymentStatus}</span>
+                )}
                 <p className="text-sm font-semibold text-gray-900">৳ {order.total}</p>
               </div>
             </div>
@@ -41,7 +53,7 @@ export default function OrdersPage() {
                 <div key={it.id} className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2">
                   <div className="pr-2">
                     <p className="font-medium text-gray-800 line-clamp-1">{it.title}</p>
-                    <p className="text-[10px] uppercase tracking-wide text-gray-500">Qty: {it.qty}</p>
+                    <p className="text-[10px] uppercase tracking-wide text-gray-500">Qty: {it.qty}{it.selectedSize ? ` • Size: ${it.selectedSize}` : ''}</p>
                   </div>
                   <p className="text-gray-900 font-semibold text-xs">৳ {it.price * it.qty}</p>
                 </div>

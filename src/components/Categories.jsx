@@ -1,4 +1,6 @@
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { listCategoryCounts } from "../services/products";
 
 // Info box components (same code as before, just separated)
 const WomenInfoBox = ({ name, items }) => (
@@ -23,25 +25,50 @@ const KidsInfoBox = ({ name, items }) => (
 );
 const Categories = () => {
   const navigate = useNavigate();
+  const [counts, setCounts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    setLoading(true); setError("");
+    listCategoryCounts()
+      .then(setCounts)
+      .catch(e => setError(e?.message || "Failed to load counts"))
+      .finally(()=> setLoading(false));
+  }, []);
+
+  const womenCount = useMemo(() => {
+    return counts.find(c => c.category === 'women')?.count || 0;
+  }, [counts]);
+  const menCount = useMemo(() => {
+    return counts.find(c => c.category === 'men')?.count || 0;
+  }, [counts]);
+  const kidsCount = useMemo(() => {
+    // Aggregate likely variants: kid/kids, girl/girls, boy/boys, child/children
+    const stems = ['kid','girl','boy','child'];
+    return counts
+      .filter(c => stems.some(s => c.category?.includes(s)))
+      .reduce((a,c)=> a + (c.count || 0), 0);
+  }, [counts]);
 
   const categories = [
     {
       id: 1,
       name: "Women",
       image: "/women.png",
-      items: "15 ITEMS",
+      items: loading ? "…" : `${womenCount} ITEMS`,
     },
     {
       id: 2,
       name: "Men",
       image: "/men.png",
-      items: "12 ITEMS",
+      items: loading ? "…" : `${menCount} ITEMS`,
     },
     {
       id: 3,
       name: "Kids",
       image: "/kids.png",
-      items: "18 ITEMS",
+      items: loading ? "…" : `${kidsCount} ITEMS`,
     },
   ];
 

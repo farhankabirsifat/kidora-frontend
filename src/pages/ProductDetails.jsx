@@ -15,8 +15,7 @@ import {
   ChevronRight,
   Check,
 } from "lucide-react";
-import { boysItems, girlsDresses, parentsItems } from "../data/products";
-import heroProduct from "../data/heroProduct";
+import { getProductById, listProducts, mapProductOutToUi } from "../services/products";
 import { useCart } from "../context/CartContext";
 import { trackViewItem, trackAddToCart } from "../utils/analytics";
 
@@ -50,26 +49,42 @@ const ProductDetails = () => {
     }, 100);
   }, [productId]);
 
-  // Get all products and include heroProduct
-  const allProducts = [
-    heroProduct,
-    ...boysItems,
-    ...girlsDresses,
-    ...parentsItems,
-  ];
+  const [product, setProduct] = useState(null);
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Find the specific product (support string or number id)
-  const product = allProducts.find((p) => String(p.id) === String(productId));
+  // Load product from backend by ID
+  useEffect(() => {
+    let ignore = false;
+    (async () => {
+      try {
+        setLoading(true);
+        const data = await getProductById(productId);
+        const p = mapProductOutToUi(data);
+        if (!ignore) setProduct(p);
+        // Load related by category
+        if (p?.category) {
+          const list = await listProducts({ category: p.category, size: 20 });
+          const mapped = list.map(mapProductOutToUi).filter(r => r.id !== p.id);
+          if (!ignore) setRelatedProducts(mapped);
+        } else {
+          if (!ignore) setRelatedProducts([]);
+        }
+      } catch (e) {
+        if (!ignore) setProduct(null);
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    })();
+    return () => { ignore = true; };
+  }, [productId]);
 
   // Calculate values that depend on product (but don't use hooks inside)
   const imagesPerSlide = 4;
-  const totalImages = product?.images ? product.images.length : 4;
+  const totalImages = product?.images ? product.images.length : 1;
   const maxSlides = Math.ceil(totalImages / imagesPerSlide);
   
   const relatedProductsPerSlide = 4;
-  const relatedProducts = product ? allProducts.filter(
-    (p) => p.category === product.category && p.id !== product.id
-  ) : [];
   const totalRelatedProducts = relatedProducts.length;
   const maxRelatedSlides =
     totalRelatedProducts > 0
@@ -154,21 +169,36 @@ const ProductDetails = () => {
 
   // Reset related products slide when product changes
   useEffect(() => {
+    if (!product) return;
     setRelatedProductsSlide(0);
     setSelectedImageIndex(0);
     setCurrentSlide(0);
     setQuantity(1);
     setSelectedSize("M");
     setIsAddedToCart(false);
-  }, [product.id]);
+  }, [product?.id]);
 
   // Helper for discounted price
   const getDiscountedPrice = (product) => {
     if (!product.discount) return product.price;
-    const priceNum = parseFloat(product.price.replace(/[৳$\s]/g, ""));
+    // Handle both string and number price formats
+    let priceNum;
+    if (typeof product.price === 'string') {
+      priceNum = parseFloat(product.price.replace(/[৳$\s]/g, ""));
+    } else {
+      priceNum = parseFloat(product.price);
+    }
     const discounted = Math.round(priceNum * (1 - product.discount / 100));
     return `৳ ${discounted}`;
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center text-gray-600">Loading product…</div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -562,20 +592,29 @@ const ProductDetails = () => {
               <h3 className="text-base md:text-lg font-semibold text-gray-900">
                 Size
               </h3>
-              <div className="flex space-x-2">
-                {["XS", "S", "M", "L", "XL", "XXL"].map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`w-10 h-10 md:w-12 md:h-12 border rounded-lg font-medium text-sm transition-colors ${
-                      selectedSize === size
-                        ? "border-blue-500 bg-blue-50 text-blue-700"
-                        : "border-gray-300 hover:border-gray-400"
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
+              <div className="flex flex-wrap gap-2">
+                {["XS", "S", "M", "L", "XL", "XXL"].map((size) => {
+                  const sizeMap = product?.sizes || product?._raw?.sizes_stock || null;
+                  const qty = sizeMap ? Number(sizeMap[size] || 0) : null;
+                  const disabled = qty !== null && qty <= 0;
+                  return (
+                    <button
+                      key={size}
+                      onClick={() => !disabled && setSelectedSize(size)}
+                      disabled={disabled}
+                      title={disabled ? 'Out of stock' : ''}
+                      className={`w-10 h-10 md:w-12 md:h-12 border rounded-lg font-medium text-sm transition-colors ${
+                        disabled
+                          ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : (selectedSize === size
+                              ? 'border-blue-500 bg-blue-50 text-blue-700'
+                              : 'border-gray-300 hover:border-gray-400')
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -609,9 +648,9 @@ const ProductDetails = () => {
               <div className="flex space-x-4">
                 <button
                   onClick={handleAddToCart}
-                  disabled={isAddedToCart}
+                  disabled={isAddedToCart || ((product?.sizes || product?._raw?.sizes_stock) && Number((product?.sizes || product?._raw?.sizes_stock)[selectedSize] || 0) <= 0)}
                   className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-2 ${
-                    isAddedToCart
+                    (isAddedToCart || ((product?.sizes || product?._raw?.sizes_stock) && Number((product?.sizes || product?._raw?.sizes_stock)[selectedSize] || 0) <= 0))
                       ? "bg-green-600 text-white"
                       : "bg-blue-600 text-white hover:bg-blue-700"
                   }`}
@@ -624,7 +663,7 @@ const ProductDetails = () => {
                   ) : (
                     <>
                       <ShoppingCart className="w-5 h-5" />
-                      <span>Add to Cart</span>
+                      <span>{((product?.sizes || product?._raw?.sizes_stock) && Number((product?.sizes || product?._raw?.sizes_stock)[selectedSize] || 0) <= 0) ? 'Out of Stock' : 'Add to Cart'}</span>
                     </>
                   )}
                 </button>
@@ -648,11 +687,22 @@ const ProductDetails = () => {
               </div>
 
               <button
+                disabled={((product?.sizes || product?._raw?.sizes_stock) && Number((product?.sizes || product?._raw?.sizes_stock)[selectedSize] || 0) <= 0)}
                 onClick={() => {
-                  addToCart(product, quantity, selectedSize);
-                  navigate("/cart");
+                  const item = {
+                    id: product.id,
+                    title: product.title,
+                    image: product.image,
+                    category: product.category,
+                    price: getDiscountedPrice(product),
+                    originalPrice: typeof product.price === 'string' ? product.price : `৳ ${product.price}`,
+                    discountPercent: product.discount || 0,
+                    quantity: quantity,
+                    selectedSize: selectedSize,
+                  };
+                  navigate("/checkout", { state: { buyNow: true, item } });
                 }}
-                className="w-full bg-gray-900 text-white py-3 px-6 rounded-xl font-semibold hover:bg-gray-800 transition-colors"
+                className={`w-full py-3 px-6 rounded-xl font-semibold transition-colors ${((product?.sizes || product?._raw?.sizes_stock) && Number((product?.sizes || product?._raw?.sizes_stock)[selectedSize] || 0) <= 0) ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-gray-900 text-white hover:bg-gray-800'}`}
               >
                 Buy Now
               </button>

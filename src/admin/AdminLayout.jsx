@@ -2,6 +2,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import Button from './components/ui/Button';
 import { useState } from 'react';
 import { useEffect, useCallback, useRef } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 const navItems = [
   { to: '/admin', label: 'Dashboard' },
@@ -14,6 +15,7 @@ export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
+  const { logout } = useAuth();
 
   // Close on ESC key
   const handleKey = useCallback((e)=>{
@@ -96,7 +98,7 @@ export default function AdminLayout() {
               <p className="font-semibold text-gray-900 leading-tight text-sm">Admin User</p>
               <p className="text-[10px] sm:text-xs text-gray-500">admin@kidora.dev</p>
             </div>
-            <Button variant="outline" className="hidden sm:inline-flex">Logout</Button>
+            <Button variant="outline" className="hidden sm:inline-flex" onClick={async ()=>{ await logout(); navigate('/admin/login', { replace: true }); }}>Logout</Button>
           </div>
         </header>
         <main className="flex-1 p-4 sm:p-6 lg:p-10 space-y-8">

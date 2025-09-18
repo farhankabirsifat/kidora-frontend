@@ -5,6 +5,7 @@ import Textarea from '../components/ui/Textarea';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import Modal from '../components/ui/Modal';
 import Badge from '../components/ui/Badge';
+import { listProducts, createProduct, updateProduct, deleteProduct as apiDeleteProduct, mapProductOutToUi } from '../../services/products';
 
 // Extended product model aligned with shop data structure
 // Fields: id, title, price, stock, rating, category, discount, description, video, image, images[]
@@ -43,16 +44,11 @@ const initialProducts = [
 ];
 
 export default function Products() {
-  const [products, setProducts] = useState(()=>{
-    try {
-      const stored = localStorage.getItem('admin_products');
-      if(stored){
-        const parsed = JSON.parse(stored);
-        if(Array.isArray(parsed) && parsed.length) return parsed;
-      }
-    } catch { /* ignore */ }
-    return initialProducts;
-  });
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [page, setPage] = useState(0);
+  const [size, setSize] = useState(50);
   const [query, setQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [stockFilter, setStockFilter] = useState(''); // low | out | in
@@ -63,7 +59,6 @@ export default function Products() {
   const [newProduct, setNewProduct] = useState({
     title: '',
     price: '',
-    stock: '',
     rating: '',
     category: '',
     discount: '',
@@ -72,17 +67,26 @@ export default function Products() {
     image: '', // object URL preview for main image
     images: [], // array of object URL previews for additional images
     _imageFile: null, // internal file ref (not persisted externally)
-    _imageFiles: [] // internal file refs
+    _imageFiles: [], // internal file refs
+    sizes: { XS:'', S:'', M:'', L:'', XL:'', XXL:'' }
   });
   const additionalImagesInputRef = useRef(null);
   const [openEdit, setOpenEdit] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
   const editAdditionalInputRef = useRef(null);
 
-  // persist
+  // load from backend
   useEffect(()=>{
-    try { localStorage.setItem('admin_products', JSON.stringify(products)); } catch { /* ignore */ }
-  },[products]);
+    (async ()=>{
+      setLoading(true); setError('');
+      try{
+        const data = await listProducts({ page, size });
+        setProducts(data.map(mapProductOutToUi));
+      }catch(e){
+        setError(e?.message || 'Failed to load products');
+      }finally{ setLoading(false); }
+    })();
+  },[page, size]);
 
   const toggleSort = (key) => {
     setSortKey(prev => prev===key ? key : key);
@@ -115,32 +119,29 @@ export default function Products() {
     return { total, low, out, avgRating };
   },[products]);
 
-  const isValid = newProduct.title && newProduct.price && newProduct.stock !== '' && newProduct.image;
+  const isValid = newProduct.title && newProduct.price && newProduct.image;
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if(!isValid) return;
-    const imagesArray = Array.isArray(newProduct.images) ? newProduct.images : [];
-    setProducts(prev => [
-      {
-        id: Date.now(),
+    try{
+      const sizesClean = Object.fromEntries(Object.entries(newProduct.sizes||{}).filter(([k,v])=>v!=='' && !isNaN(Number(v))).map(([k,v])=>[k, Number(v)]));
+      const created = await createProduct({
         title: newProduct.title,
+        description: newProduct.description,
         price: Number(newProduct.price),
-        stock: Number(newProduct.stock)||0,
-        rating: newProduct.rating ? Number(newProduct.rating) : 0,
         category: newProduct.category || 'uncategorized',
+        rating: newProduct.rating ? Number(newProduct.rating) : 0,
         discount: newProduct.discount ? Number(newProduct.discount) : 0,
-        description: newProduct.description || '',
-        video: newProduct.video || '',
-        image: newProduct.image || '',
-        images: imagesArray,
-      },
-      ...prev
-    ]);
+        mainImageFile: newProduct._imageFile,
+        imageFiles: newProduct._imageFiles,
+        sizes: sizesClean,
+      });
+      const mapped = mapProductOutToUi(created);
+      setProducts(prev => [mapped, ...prev]);
     // reset
-    setNewProduct({
-      title: '', price: '', stock: '', rating: '', category: '', discount: '', description: '', video: '', image: '', images: [], _imageFile: null, _imageFiles: []
-    });
-    setOpenNew(false);
+    setNewProduct({ title: '', price: '', rating: '', category: '', discount: '', description: '', video: '', image: '', images: [], _imageFile: null, _imageFiles: [], sizes: { XS:'', S:'', M:'', L:'', XL:'', XXL:'' } });
+      setOpenNew(false);
+    }catch(e){ setError(e?.message || 'Failed to create product'); }
   };
 
   const handleMainImageChange = (e) => {
@@ -159,6 +160,12 @@ export default function Products() {
     }
     // reset input so same file can be re-added if needed
     if(e.target) e.target.value='';
+  };
+
+  const computeTotalFromSizes = (sizesObj) => {
+    try {
+      return Object.values(sizesObj||{}).reduce((sum, v)=> sum + (Number(v)||0), 0);
+    } catch { return 0; }
   };
 
   const removeAdditionalImage = (idx) => {
@@ -187,7 +194,10 @@ export default function Products() {
     }
   },[]);
 
-  const handleDelete = (id) => setProducts(prev => prev.filter(p=>p.id!==id));
+  const handleDelete = async (id) => {
+    try { await apiDeleteProduct(id); setProducts(prev => prev.filter(p=>p.id!==id)); }
+    catch(e){ setError(e?.message || 'Failed to delete'); }
+  };
   const handleBulkDelete = () => {
     if(!selected.length) return;
     setProducts(prev => prev.filter(p=>!selected.includes(p.id)));
@@ -203,18 +213,38 @@ export default function Products() {
 
   // editing logic
   const openEditModal = (product) => {
-    setEditProduct({ ...product, featureInput:'', _imageFile:null, _imageFiles:[] });
+    const initialSizes = product?.sizes || product?._raw?.sizes_stock || {};
+    const norm = { XS:'', S:'', M:'', L:'', XL:'', XXL:'' };
+    for(const k of Object.keys(initialSizes||{})){
+      if(k in norm) norm[k] = String(initialSizes[k] ?? '');
+    }
+    setEditProduct({ ...product, featureInput:'', _imageFile:null, _imageFiles:[], sizes: norm });
     setOpenEdit(true);
   };
 
-  const isEditValid = editProduct && editProduct.title && editProduct.price!=='' && editProduct.stock!=='' && editProduct.image;
+  const isEditValid = editProduct && editProduct.title && editProduct.price!=='' && editProduct.image;
 
-  const saveEditedProduct = () => {
+  const saveEditedProduct = async () => {
     if(!isEditValid) return;
-  const { _imageFile, _imageFiles, featureInput: _unusedFeature, ...clean } = editProduct;
-    setProducts(prev => prev.map(p=>p.id===clean.id ? clean : p));
-    setOpenEdit(false);
-    setEditProduct(null);
+    try{
+      const { _imageFile, _imageFiles, featureInput: _unusedFeature, sizes, ...clean } = editProduct;
+      const sizesClean = Object.fromEntries(Object.entries(sizes||{}).filter(([k,v])=>v!=='' && !isNaN(Number(v))).map(([k,v])=>[k, Number(v)]));
+      const updated = await updateProduct(clean.id, {
+        title: clean.title,
+        description: clean.description,
+        price: Number(clean.price),
+        category: clean.category || 'uncategorized',
+        rating: clean.rating ? Number(clean.rating) : 0,
+        discount: clean.discount ? Number(clean.discount) : 0,
+        mainImageFile: _imageFile || undefined,
+        imageFiles: _imageFiles && _imageFiles.length ? _imageFiles : undefined,
+        sizes: sizesClean,
+      });
+      const mapped = mapProductOutToUi(updated);
+      setProducts(prev => prev.map(p=>p.id===mapped.id ? mapped : p));
+      setOpenEdit(false);
+      setEditProduct(null);
+    }catch(e){ setError(e?.message || 'Failed to update product'); }
   };
 
   const handleEditMainImageChange = (e) => {
@@ -262,6 +292,8 @@ export default function Products() {
                 <option value="men">Men</option>
                 <option value="women">Women</option>
                 <option value="kids">Kids</option>
+                <option value="kids-boys">Kids - Boys</option>
+                <option value="kids-girls">Kids - Girls</option>
               </select>
               <select value={stockFilter} onChange={e=>setStockFilter(e.target.value)} className="border border-gray-300 rounded-md text-sm px-2 py-2 bg-white">
                 <option value="">All Stock</option>
@@ -306,6 +338,7 @@ export default function Products() {
                 <th className="py-2 pr-4 font-medium cursor-pointer" onClick={()=>toggleSort('title')}>Title {sortKey==='title' && (sortDir==='asc'?'▲':'▼')}</th>
                 <th className="py-2 pr-4 font-medium cursor-pointer" onClick={()=>toggleSort('price')}>Price {sortKey==='price' && (sortDir==='asc'?'▲':'▼')}</th>
                 <th className="py-2 pr-4 font-medium cursor-pointer" onClick={()=>toggleSort('stock')}>Stock {sortKey==='stock' && (sortDir==='asc'?'▲':'▼')}</th>
+                <th className="py-2 pr-4 font-medium">Sizes</th>
                 <th className="py-2 pr-4 font-medium">Cat.</th>
                 <th className="py-2 pr-4 font-medium cursor-pointer" onClick={()=>toggleSort('rating')}>Rating {sortKey==='rating' && (sortDir==='asc'?'▲':'▼')}</th>
                 <th className="py-2 pr-4 font-medium">Disc%</th>
@@ -314,6 +347,12 @@ export default function Products() {
               </tr>
             </thead>
             <tbody>
+              {loading && (
+                <tr><td colSpan={11} className="py-6 text-center text-gray-500">Loading…</td></tr>
+              )}
+              {error && !loading && (
+                <tr><td colSpan={11} className="py-6 text-center text-red-600">{error}</td></tr>
+              )}
               {filtered.map(p => (
                 <tr key={p.id} className={`border-b last:border-0 ${selected.includes(p.id)?'bg-indigo-50/50':''}`}>
                   <td className="py-2 pr-4 align-top"><input type="checkbox" checked={selected.includes(p.id)} onChange={()=>toggleSelect(p.id)} /></td>
@@ -326,6 +365,15 @@ export default function Products() {
                   </td>
                   <td className="py-2 pr-4 whitespace-nowrap font-medium">৳ {p.price}</td>
                   <td className="py-2 pr-4 w-24 font-mono">{p.stock}</td>
+                  <td className="py-2 pr-4 text-[11px] text-gray-600">
+                    {p.sizes ? (
+                      <div className="flex flex-wrap gap-1">
+                        {Object.entries(p.sizes).map(([sz,qty])=> (
+                          <span key={sz} className={`px-1.5 py-0.5 rounded border ${Number(qty)>0? 'bg-emerald-50 border-emerald-200 text-emerald-700':'bg-gray-50 border-gray-200 text-gray-500'}`}>{sz}:{qty}</span>
+                        ))}
+                      </div>
+                    ) : <span className="text-gray-400">-</span>}
+                  </td>
                   <td className="py-2 pr-4 whitespace-nowrap capitalize">{p.category||'-'}</td>
                   <td className="py-2 pr-4 w-20">{p.rating || 0}</td>
                   <td className="py-2 pr-4 w-20">{p.discount || 0}</td>
@@ -336,13 +384,20 @@ export default function Products() {
                   </td>
                 </tr>
               ))}
-              {filtered.length===0 && (
+              {filtered.length===0 && !loading && !error && (
                 <tr>
                   <td colSpan={11} className="py-10 text-center text-gray-500">No products found</td>
                 </tr>
               )}
             </tbody>
           </table>
+          <div className="flex items-center justify-between py-3">
+            <div className="text-xs text-gray-500">Page {page+1}</div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={()=> setPage(p=> Math.max(0, p-1))} disabled={page===0}>Prev</Button>
+              <Button variant="outline" onClick={()=> setPage(p=> p+1)}>Next</Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -367,10 +422,6 @@ export default function Products() {
                   <Input type="number" className={!newProduct.price? 'border-red-300 focus:ring-red-300':''} value={newProduct.price} onChange={e=>setNewProduct(p=>({...p,price:e.target.value}))} />
                 </div>
                 <div>
-                  <label className="flex items-center justify-between text-[11px] font-medium text-gray-600 mb-1">Stock * {newProduct.stock==='' && <span className="text-red-500 font-normal">Required</span>}</label>
-                  <Input type="number" className={newProduct.stock===''? 'border-red-300 focus:ring-red-300':''} value={newProduct.stock} onChange={e=>setNewProduct(p=>({...p,stock:e.target.value}))} />
-                </div>
-                <div>
                   <label className="text-[11px] font-medium text-gray-600 mb-1">Category</label>
                   <select
                     className="w-full rounded-md border border-gray-300 bg-white px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -381,6 +432,8 @@ export default function Products() {
                     <option value="men">Men</option>
                     <option value="women">Women</option>
                     <option value="kids">Kids</option>
+                    <option value="kids-boys">Kids - Boys</option>
+                    <option value="kids-girls">Kids - Girls</option>
                   </select>
                 </div>
               </div>
@@ -398,6 +451,22 @@ export default function Products() {
                 <label className="text-[11px] font-medium text-gray-600 mb-1">Discount %</label>
                 <Input type="number" value={newProduct.discount} onChange={e=>setNewProduct(p=>({...p,discount:e.target.value}))} />
               </div>
+            </div>
+          </div>
+          {/* Sizes (optional) */}
+          <div className="border border-gray-200 rounded-lg p-4 bg-gray-50/40">
+            <h4 className="text-xs font-semibold tracking-wide text-gray-600 mb-3 uppercase">Per-size Stock (optional)</h4>
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+              {['XS','S','M','L','XL','XXL'].map(sz=> (
+                <div key={sz}>
+                  <label className="text-[11px] font-medium text-gray-600 mb-1">{sz}</label>
+                  <Input type="number" min="0" value={newProduct.sizes[sz]} onChange={e=>setNewProduct(p=>({...p, sizes: { ...p.sizes, [sz]: e.target.value }}))} />
+                </div>
+              ))}
+            </div>
+            <div className="text-[11px] text-gray-500 mt-2 flex items-center justify-between">
+              <span>Leave blank for sizes you don’t stock.</span>
+              <span className="font-medium text-gray-700">Total (computed): {computeTotalFromSizes(newProduct.sizes)}</span>
             </div>
           </div>
           {/* Media */}
@@ -480,16 +549,14 @@ export default function Products() {
                     <Input type="number" value={editProduct.price} onChange={e=>setEditProduct(p=>({...p,price:e.target.value}))} />
                   </div>
                   <div>
-                    <label className="text-[11px] font-medium text-gray-600 mb-1">Stock *</label>
-                    <Input type="number" value={editProduct.stock} onChange={e=>setEditProduct(p=>({...p,stock:e.target.value}))} />
-                  </div>
-                  <div>
                     <label className="text-[11px] font-medium text-gray-600 mb-1">Category</label>
                     <select className="w-full rounded-md border border-gray-300 bg-white px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" value={editProduct.category} onChange={e=>setEditProduct(p=>({...p,category:e.target.value}))}>
                       <option value="">Select...</option>
                       <option value="men">Men</option>
                       <option value="women">Women</option>
                       <option value="kids">Kids</option>
+                      <option value="kids-boys">Kids - Boys</option>
+                      <option value="kids-girls">Kids - Girls</option>
                     </select>
                   </div>
                 </div>
@@ -510,6 +577,21 @@ export default function Products() {
                   <label className="text-[11px] font-medium text-gray-600 mb-1">Video (embed URL)</label>
                   <Input value={editProduct.video} onChange={e=>setEditProduct(p=>({...p,video:e.target.value}))} placeholder="https://www.youtube.com/embed/..." />
                 </div>
+              </div>
+            </div>
+            <div className="border border-gray-200 rounded-lg p-4 bg-gray-50/40">
+              <h4 className="text-xs font-semibold tracking-wide text-gray-600 mb-3 uppercase">Per-size Stock</h4>
+              <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+                {['XS','S','M','L','XL','XXL'].map(sz=> (
+                  <div key={sz}>
+                    <label className="text-[11px] font-medium text-gray-600 mb-1">{sz}</label>
+                    <Input type="number" min="0" value={editProduct.sizes?.[sz] ?? ''} onChange={e=>setEditProduct(p=>({...p, sizes: { ...(p.sizes||{}), [sz]: e.target.value }}))} />
+                  </div>
+                ))}
+              </div>
+              <div className="text-[11px] text-gray-500 mt-2 flex items-center justify-between">
+                <span>Blank means size not tracked.</span>
+                <span className="font-medium text-gray-700">Total (computed): {computeTotalFromSizes(editProduct.sizes)}</span>
               </div>
             </div>
             <div className="border border-gray-200 rounded-lg p-4 bg-gray-50/40">

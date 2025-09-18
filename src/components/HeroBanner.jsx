@@ -1,33 +1,35 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import heroBanners from "../data/heroBanners";
+import useHeroBanners from "../context/useHeroBanners";
 
 const HeroBanner = () => {
   const navigate = useNavigate();
   const INTERVAL = 5000;
+  const { banners, loading } = useHeroBanners();
   const [current, setCurrent] = useState(1); // start from first actual slide (index 1)
   const [isPaused, setIsPaused] = useState(false);
   const [transitionEnabled, setTransitionEnabled] = useState(true);
-  const len = heroBanners.length;
+  const len = banners.length;
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
   const touchThreshold = 50;
 
   // clone slides: [last, ...original, first]
-  const slides = [heroBanners[len - 1], ...heroBanners, heroBanners[0]];
+  const slides = len > 0 ? [banners[len - 1], ...banners, banners[0]] : [];
 
   const next = () => setCurrent((prev) => prev + 1);
   const prev = () => setCurrent((prev) => prev - 1);
 
   // auto-slide
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || len === 0) return;
     const t = setTimeout(next, INTERVAL);
     return () => clearTimeout(t);
-  }, [current, isPaused]);
+  }, [current, isPaused, len]);
 
   // seamless loop logic
   useEffect(() => {
+    if (!slides.length) return;
     if (current === slides.length - 1) {
       setTimeout(() => {
         setTransitionEnabled(false);
@@ -68,6 +70,9 @@ const HeroBanner = () => {
     touchEndX.current = 0;
   };
 
+  if (loading) return null;
+  if (!len) return null;
+
   return (
     <section
       className="relative overflow-hidden bg-gradient-to-br from-blue-500 via-blue-600 to-purple-700 pt-8"
@@ -100,8 +105,8 @@ const HeroBanner = () => {
                   <div className="flex-[1.5] flex justify-center lg:justify-start mb-8 lg:mb-0 h-full">
                     <div className="relative group h-full w-full overflow-hidden">
                       <img
-                        src={b.image}
-                        alt={b.title}
+                        src={b.imageUrl}
+                        alt={b.title || ''}
                         className="w-full h-full max-w-[700px] max-h-[650px] object-contain transform group-hover:scale-105 transition-transform duration-500 mx-auto"
                       />
                     </div>
@@ -115,34 +120,25 @@ const HeroBanner = () => {
                     </div>
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 leading-tight">
                       <span className="bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
-                        {b.title}
+                        {b.title || 'Kidora' }
                       </span>
                     </h1>
-                    <p className="text-white text-lg mb-6">{b.description}</p>
+                    <p className="text-white text-lg mb-6">{b.subtitle || ''}</p>
                     <div className="flex items-center justify-center lg:justify-start space-x-6 mb-8">
+                      {/* Keep spacing/alignment, but product pricing is not part of banner payload */}
                       <div className="text-center">
                         <span className="text-4xl md:text-5xl font-black text-white drop-shadow-lg">
-                          {b.price}
+                          Kidora
                         </span>
-                        <div className="text-xs text-blue-100 uppercase tracking-wide mt-1">
-                          Now
-                        </div>
-                      </div>
-                      <div className="text-center opacity-75">
-                        <span className="text-2xl text-white line-through">
-                          {b.oldPrice}
-                        </span>
-                        <div className="text-xs text-blue-200 uppercase tracking-wide mt-1">
-                          Was
-                        </div>
-                      </div>
-                      <div className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                        {b.discount}% OFF
+                        <div className="text-xs text-blue-100 uppercase tracking-wide mt-1">Shop</div>
                       </div>
                     </div>
                     <button
                       className="group bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
-                      onClick={() => navigate(`/product/${b.id}`)}
+                      onClick={() => {
+                        if (b.linkUrl && /^https?:\/\//i.test(b.linkUrl)) window.location.href = b.linkUrl;
+                        else if (b.linkUrl) navigate(b.linkUrl);
+                      }}
                     >
                       <span className="flex items-center justify-center">
                         🛒 Shop Now
@@ -156,7 +152,7 @@ const HeroBanner = () => {
 
           {/* Dots below slider */}
           <div className="flex justify-center space-x-2 mt-6">
-            {heroBanners.map((_, i) => (
+            {banners.map((_, i) => (
               <button
                 key={i}
                 className={`w-3 h-3 rounded-full transition-all duration-300 ${

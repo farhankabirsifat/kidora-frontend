@@ -1,53 +1,31 @@
 import { createContext, useEffect, useState, useCallback } from 'react';
-import heroBannersSeed from '../data/heroBanners';
+import { listHeroBanners } from '../services/hero';
 
 const HeroBannerContext = createContext();
 
 export function HeroBannerProvider({ children }) {
   const [banners, setBanners] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // load from localStorage or seed
-  useEffect(()=>{
+  const refreshFromBackend = useCallback(async () => {
+    setLoading(true); setError('');
     try {
-      const raw = localStorage.getItem('heroBanners');
-      if(raw){
-        setBanners(JSON.parse(raw));
-      } else {
-        setBanners(heroBannersSeed);
-      }
-  } catch{
-      setBanners(heroBannersSeed);
+      const data = await listHeroBanners();
+      // data items: { id, title, subtitle, imageUrl, linkUrl }
+      setBanners(data);
+      return data;
+    } catch (e) {
+      setError(e?.message || 'Failed to load hero banners');
+      return [];
     } finally {
       setLoading(false);
     }
-  },[]);
+  }, []);
 
-  // persist
-  useEffect(()=>{
-    if(!loading){
-      localStorage.setItem('heroBanners', JSON.stringify(banners));
-    }
-  },[banners, loading]);
+  useEffect(() => { refreshFromBackend(); }, [refreshFromBackend]);
 
-  const addHeroBanner = (data) => {
-    setBanners(prev => [{ id: Date.now(), ...data }, ...prev]);
-  };
-
-  const removeHeroBanner = (id) => setBanners(prev => prev.filter(b=>b.id!==id));
-
-  // placeholder backend fetch simulation
-  const refreshFromBackend = useCallback(async ()=>{
-    setLoading(true);
-    // simulate latency + potential server transformation
-    await new Promise(r=>setTimeout(r, 400));
-    // In real scenario fetch('/api/hero-banners').then(res=>res.json())
-    // For now just reuse current persisted list
-    setLoading(false);
-    return banners;
-  },[banners]);
-
-  const value = { banners, loading, addHeroBanner, removeHeroBanner, refreshFromBackend };
+  const value = { banners, loading, error, refreshFromBackend };
   return <HeroBannerContext.Provider value={value}>{children}</HeroBannerContext.Provider>;
 }
 

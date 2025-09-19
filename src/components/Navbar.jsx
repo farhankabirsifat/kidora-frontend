@@ -1,8 +1,9 @@
-import { Search, ShoppingCart, Menu, X, Heart, User } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Search, ShoppingCart, Menu, X, Heart, User, ChevronRight } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { useOrders } from "../context/useOrders";
 import { brandName } from "../utils/brand";
 import { listProducts } from "../services/products";
 
@@ -10,7 +11,10 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { cartItemsCount, wishlistItemsCount } = useCart();
+  const { orders } = useOrders();
+  const panelRef = useRef(null);
 
   const [searchInput, setSearchInput] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -102,6 +106,24 @@ const Navbar = () => {
     }, 250);
     return () => { cancelled = true; clearTimeout(h); };
   }, [mobileSearchInput]);
+
+  useEffect(()=>{
+    // Close mobile menu whenever route changes
+    setIsMobileMenuOpen(false);
+    setMobileSearchOpen(false);
+  }, [location.pathname]);
+
+  // Close on outside click
+  useEffect(()=>{
+    if(!isMobileMenuOpen) return;
+    function handle(e){
+      if(panelRef.current && !panelRef.current.contains(e.target)){
+        setIsMobileMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handle);
+    return ()=>document.removeEventListener('mousedown', handle);
+  },[isMobileMenuOpen]);
 
   return (
     <nav className="bg-white shadow-lg border-b border-gray-200 fixed top-0 left-0 w-full z-50">
@@ -400,50 +422,73 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-gray-200 bg-white">
-            <div className="px-4 pt-4 pb-6 space-y-4">
-              {/* Mobile Menu Items */}
-              <div className="grid grid-cols-2 gap-4 mt-6">
-                {/* Admin Panel (only for admin accounts) */}
+          <>
+            <div className="fixed inset-0 bg-black/40 backdrop-blur-sm lg:hidden" />
+            <div ref={panelRef} className="fixed top-0 right-0 h-full w-80 max-w-full bg-white shadow-xl border-l border-gray-200 flex flex-col z-50 animate-slide-in">
+              <div className="flex items-center justify-between px-5 h-16 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <img src="/Kidora-logo.png" alt="Kidora" className="h-8 w-auto" />
+                  <span className="font-semibold text-gray-800">Menu</span>
+                </div>
+                <button onClick={()=>setIsMobileMenuOpen(false)} className="p-2 rounded-full hover:bg-gray-100 text-gray-600"><X className="w-5 h-5" /></button>
+              </div>
+              <div className="p-5 border-b border-gray-100">
+                {isAuthenticated ? (
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-lg">
+                      {(/* initial */()=>{ const u = localStorage.getItem('kidora_user'); try{ const obj=JSON.parse(u); return (obj?.firstName?.[0]||obj?.email?.[0]||'U').toUpperCase(); }catch{return 'U';} })()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{(localStorage.getItem('kidora_user') && (()=>{ try { const o=JSON.parse(localStorage.getItem('kidora_user')); return (o.firstName||o.email||'User'); } catch { return 'User'; } })())}</p>
+                      <p className="text-xs text-gray-500 truncate">{(localStorage.getItem('kidora_user') && (()=>{ try { const o=JSON.parse(localStorage.getItem('kidora_user')); return o.email; } catch { return ''; } })())}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-600">Welcome! Please login to see your profile and orders.</p>
+                )}
+                <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+                  <div className="p-3 rounded-lg bg-blue-50">
+                    <p className="text-sm font-semibold text-blue-600">{orders.length}</p>
+                    <p className="text-[10px] uppercase tracking-wide text-blue-700">Orders</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-green-50">
+                    <p className="text-sm font-semibold text-green-600">{cartItemsCount}</p>
+                    <p className="text-[10px] uppercase tracking-wide text-green-700">Cart</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-red-50">
+                    <p className="text-sm font-semibold text-red-600">{wishlistItemsCount}</p>
+                    <p className="text-[10px] uppercase tracking-wide text-red-700">Wishlist</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
                 {isAdmin && (
-                  <button
-                    onClick={() => { setIsMobileMenuOpen(false); navigate("/kidora-admin"); }}
-                    className="col-span-2 flex flex-col items-center space-y-2 p-4 rounded-lg bg-blue-600 hover:shadow transition-colors border border-purple-200"
-                  >
-                    <span className="text-sm font-semibold text-white">Admin Panel</span>
+                  <button onClick={()=>{ setIsMobileMenuOpen(false); navigate('/kidora-admin'); }} className="w-full flex items-center justify-between px-4 py-3 rounded-lg bg-blue-600 text-white text-sm font-medium shadow hover:bg-blue-700">
+                    <span>Admin Dashboard</span>
+                    <ChevronRight className="w-4 h-4" />
                   </button>
                 )}
-                <button
-                  onClick={() => navigate(isAuthenticated ? "/profile" : "/login")}
-                  className="flex flex-col items-center space-y-2 p-4 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <User className="w-6 h-6 text-blue-600" />
-                  <span className="text-sm font-medium text-gray-700">
-                    {isAuthenticated ? 'Profile' : 'Login'}
-                  </span>
-                </button>
-                <button
-                  onClick={() => navigate("/wishlist")}
-                  className="flex flex-col items-center space-y-2 p-4 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <Heart className="w-6 h-6 text-red-500" />
-                  <span className="text-sm font-medium text-gray-700">
-                    Wishlist ({wishlistItemsCount})
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => navigate("/cart")}
-                  className="flex flex-col items-center space-y-2 p-4 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <ShoppingCart className="w-6 h-6 text-green-500" />
-                  <span className="text-sm font-medium text-gray-700">
-                    Cart ({cartItemsCount})
-                  </span>
-                </button>
+                <div className="space-y-2">
+                  <button onClick={()=>{ setIsMobileMenuOpen(false); navigate(isAuthenticated ? '/profile' : '/login'); }} className="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium">
+                    <span className="flex items-center gap-2"><User className="w-4 h-4 text-blue-600" /> {isAuthenticated ? 'Profile' : 'Login'}</span>
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </button>
+                  <button onClick={()=>{ setIsMobileMenuOpen(false); navigate('/wishlist'); }} className="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium">
+                    <span className="flex items-center gap-2"><Heart className="w-4 h-4 text-red-500" /> Wishlist ({wishlistItemsCount})</span>
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </button>
+                  <button onClick={()=>{ setIsMobileMenuOpen(false); navigate('/cart'); }} className="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium">
+                    <span className="flex items-center gap-2"><ShoppingCart className="w-4 h-4 text-green-500" /> Cart ({cartItemsCount})</span>
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </button>
+                </div>
+              </div>
+              <div className="p-4 border-t border-gray-100 flex items-center justify-between">
+                <p className="text-[11px] text-gray-500">{brandName} © {new Date().getFullYear()}</p>
+                <button onClick={()=>setIsMobileMenuOpen(false)} className="text-xs px-3 py-1.5 rounded-md border border-gray-300 hover:bg-gray-50">Close</button>
               </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </nav>

@@ -47,6 +47,15 @@ export default function Orders() {
   const [methodFilter, setMethodFilter] = useState('');
   const [sortKey, setSortKey] = useState('date');
   const [sortDir, setSortDir] = useState('desc');
+  // UI saving / feedback states
+  const [savingStatus, setSavingStatus] = useState(false);
+  const [savingPayment, setSavingPayment] = useState(false);
+  const [flash, setFlash] = useState(null); // {type:'success'|'error', msg:string}
+  useEffect(()=>{
+    if(!flash) return;
+    const id = setTimeout(()=> setFlash(null), 3500);
+    return ()=> clearTimeout(id);
+  }, [flash]);
 
   useEffect(() => {
     (async () => {
@@ -142,6 +151,7 @@ export default function Orders() {
     if(o.source !== 'backend') return;
     const backend = uiToBackendStatus[uiStatus] || 'PENDING';
     try {
+      setSavingStatus(true);
       const updated = await updateOrderStatus(o.backendId, backend);
       const mapped = {
         id: `#${updated.id}`,
@@ -162,8 +172,12 @@ export default function Orders() {
       };
       setBackendOrders(prev => prev.map(ord => ord.backendId===o.backendId? mapped : ord));
       setSelected(s => s && s.backendId===o.backendId? mapped : s);
+      setFlash({type:'success', msg:'Status updated'});
     } catch(e) {
       setError(e?.message || 'Failed to update status');
+      setFlash({type:'error', msg: e?.message || 'Failed to update status'});
+    } finally {
+      setSavingStatus(false);
     }
   };
 
@@ -171,6 +185,7 @@ export default function Orders() {
     if(o.source !== 'backend') return;
     const backend = (uiPayment || 'pending').toUpperCase();
     try {
+      setSavingPayment(true);
       const updated = await updatePaymentStatus(o.backendId, backend);
       const mapped = {
         id: `#${updated.id}`,
@@ -191,8 +206,12 @@ export default function Orders() {
       };
       setBackendOrders(prev => prev.map(ord => ord.backendId===o.backendId? mapped : ord));
       setSelected(s => s && s.backendId===o.backendId? mapped : s);
+      setFlash({type:'success', msg:'Payment status updated'});
     } catch(e) {
       setError(e?.message || 'Failed to update payment');
+      setFlash({type:'error', msg: e?.message || 'Failed to update payment'});
+    } finally {
+      setSavingPayment(false);
     }
   };
 
@@ -527,7 +546,9 @@ export default function Orders() {
                     <select value={selected.status} onChange={e=> setSelected(s=> ({...s, status: e.target.value}))} className='border border-gray-300 rounded-md px-2 py-2 text-sm'>
                       {statusOptions.map(s=> <option key={s} value={s}>{s}</option>)}
                     </select>
-                    <Button onClick={()=> setStatusExplicit(selected, selected.status)}>Save</Button>
+                    <Button disabled={savingStatus} onClick={()=> !savingStatus && setStatusExplicit(selected, selected.status)}>
+                      {savingStatus ? 'Saving...' : 'Save'}
+                    </Button>
                   </div>
                 </div>
                 <div>
@@ -536,9 +557,16 @@ export default function Orders() {
                     <select value={selected.paymentStatus || 'pending'} onChange={e=> setSelected(s=> ({...s, paymentStatus: e.target.value}))} className='border border-gray-300 rounded-md px-2 py-2 text-sm'>
                       {paymentOptions.map(p=> <option key={p} value={p}>{p}</option>)}
                     </select>
-                    <Button onClick={()=> setPaymentExplicit(selected, selected.paymentStatus || 'pending')}>Save</Button>
+                    <Button disabled={savingPayment} onClick={()=> !savingPayment && setPaymentExplicit(selected, selected.paymentStatus || 'pending')}>
+                      {savingPayment ? 'Saving...' : 'Save'}
+                    </Button>
                   </div>
                 </div>
+              </div>
+            )}
+            {flash && (
+              <div className={`text-xs mt-4 px-3 py-2 rounded-md inline-block ${flash.type==='success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                {flash.msg}
               </div>
             )}
           </div>

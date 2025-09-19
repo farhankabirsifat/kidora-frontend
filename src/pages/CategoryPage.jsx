@@ -36,6 +36,16 @@ const CategoryPage = () => {
   const [size] = useState(100);
   const [availableCategories, setAvailableCategories] = useState([]);
 
+  // Scroll to top whenever the category changes so the banner is visible immediately
+  useEffect(() => {
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    } catch (_) {
+      // fallback
+      window.scrollTo(0, 0);
+    }
+  }, [categoryName]);
+
   // Fetch distinct categories once (optional use)
   useEffect(() => {
     listCategories()

@@ -7,6 +7,7 @@ import { createUserOrder } from "../services/orders";
 import { bdDistricts } from "../data/bdDistricts"; // still used maybe later; can remove if unused
 import DistrictAutocomplete from "../components/DistrictAutocomplete";
 import { useOrders } from "../context/useOrders";
+import { getPaymentConfig } from "../services/paymentConfig";
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -27,11 +28,11 @@ const CheckoutPage = () => {
   const [senderNumber, setSenderNumber] = useState("");
   const [transactionId, setTransactionId] = useState("");
 
-  const paymentAccounts = {
-    bkash: { label: 'bKash', number: '01710000001', instructions: 'Send Money (Personal)' },
-    nagad: { label: 'Nagad', number: '01810000002', instructions: 'Send Money (Personal)' },
-    rocket: { label: 'Rocket', number: '01610000003', instructions: 'Send Money (Personal)' },
-  };
+  const [paymentAccounts, setPaymentAccounts] = useState({
+    bkash: { label: 'bKash', number: '', instructions: 'Send Money (Personal)' },
+    nagad: { label: 'Nagad', number: '', instructions: 'Send Money (Personal)' },
+    rocket: { label: 'Rocket', number: '', instructions: 'Send Money (Personal)' },
+  });
 
   // Support Buy-Now flow via route state
   const isBuyNow = Boolean(location.state?.buyNow && location.state?.item);
@@ -134,6 +135,21 @@ const CheckoutPage = () => {
       trackBeginCheckout(items, finalTotal);
     }
   }, [displayedItems, finalTotal]);
+
+  useEffect(()=>{
+    (async ()=>{
+      try {
+        const data = await getPaymentConfig();
+        setPaymentAccounts(prev=>({
+          bkash: { ...prev.bkash, number: data.bkashNumber || '' },
+          nagad: { ...prev.nagad, number: data.nagadNumber || '' },
+          rocket: { ...prev.rocket, number: data.rocketNumber || '' },
+        }));
+      } catch(e){
+        console.warn('Failed to load payment config', e);
+      }
+    })();
+  },[]);
 
   if (!isBuyNow && cartItems.length === 0) {
     return (

@@ -10,6 +10,7 @@ const navItems = [
   { to: '/kidora-admin/hero', label: 'Hero Section' },
   { to: '/kidora-admin/orders', label: 'Orders' },
   { to: '/kidora-admin/customers', label: 'Customers Info' },
+  { to: '/kidora-admin/payments', label: 'Payment Numbers' }, // added
 ];
 
 export default function AdminLayout() {

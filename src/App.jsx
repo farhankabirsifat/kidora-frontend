@@ -28,6 +28,7 @@ import Customers from "./admin/pages/Customers";
 import CustomerOrders from './admin/pages/CustomerOrders';
 import DistrictsPage from './pages/DistrictsPage';
 import AdminAccessDenied from "./admin/AdminAccessDenied";
+import PaymentConfig from "./admin/pages/PaymentConfig";
 import NotFound from "./pages/NotFound";
 import "./App.css";
 
@@ -91,6 +92,7 @@ function AppShell() {
             <Route path="orders" element={<AdminOrders />} />
             <Route path="customers" element={<Customers />} />
             <Route path="customers/:userId" element={<CustomerOrders />} />
+            <Route path="payments" element={<PaymentConfig />} />
             <Route path="*" element={<Navigate to="/404" replace state={{ originalPath: location.pathname }} />} />
           </Route>
 

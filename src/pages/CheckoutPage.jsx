@@ -44,7 +44,11 @@ const CheckoutPage = () => {
     return Number.isFinite(n) ? n : 0;
   };
   const subtotal = useMemo(() => displayedItems.reduce((sum, it) => sum + parseMoney(it.price) * (it.quantity || 1), 0), [displayedItems]);
-  const shippingCost = subtotal >= 500 ? 0 : 60;
+  // Shipping: 70 BDT inside Dhaka, 120 BDT outside
+  const shippingCost = useMemo(() => {
+    if (!form.city) return 0; // until district selected
+    return form.city.toLowerCase() === 'dhaka' ? 70 : 120;
+  }, [form.city]);
   const finalTotal = subtotal + shippingCost;
 
   const handleChange = (e) => {
@@ -365,8 +369,8 @@ const CheckoutPage = () => {
                   <span>৳{subtotal.toFixed(0)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
-                  <span>Shipping</span>
-                  <span>{shippingCost === 0 ? "Free" : `৳${shippingCost}`}</span>
+                  <span>Shipping {form.city ? (form.city.toLowerCase()==='dhaka' ? '(Dhaka)' : '(Outside Dhaka)') : ''}</span>
+                  <span>{form.city ? `৳${shippingCost}` : '—'}</span>
                 </div>
                 <div className="border-t pt-3 space-y-1">
                   <div className="flex justify-between text-lg font-semibold text-gray-900">

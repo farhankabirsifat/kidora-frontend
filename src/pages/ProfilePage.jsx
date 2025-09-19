@@ -126,27 +126,27 @@ export default function ProfilePage() {
               </div>
             </div>
             <div className={`mt-6 space-y-2 text-sm ${menuOpen ? 'block' : 'hidden'} animate-fade-in`}>  
-              <button onClick={()=>{ navigate('/profile?tab=account'); setSection('account'); setEditing(false); }} className={`flex w-full items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 ${section==='account' ? 'bg-gray-50' : ''}`}>
+              <button onClick={()=>{ navigate('/profile?tab=account'); setSection('account'); setEditing(false); setMenuOpen(false); }} className={`flex w-full items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 ${section==='account' ? 'bg-gray-50' : ''}`}>
                 <span className="flex items-center gap-2"><User className="w-4 h-4" /> Account Info</span>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </button>
-              <button onClick={()=>navigate('/orders')} className="flex w-full items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50">
+              <button onClick={()=>{navigate('/orders'); setMenuOpen(false);}} className="flex w-full items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50">
                 <span className="flex items-center gap-2"><ShoppingCart className="w-4 h-4" /> Orders ({orders.length})</span>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </button>
-              <button onClick={()=>navigate('/wishlist')} className="flex w-full items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50">
+              <button onClick={()=>{navigate('/wishlist'); setMenuOpen(false);}} className="flex w-full items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50">
                 <span className="flex items-center gap-2"><Heart className="w-4 h-4" /> Wishlist ({wishlistItems.length})</span>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </button>
-              <button onClick={()=>navigate('/cart')} className="flex w-full items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50">
+              <button onClick={()=>{navigate('/cart'); setMenuOpen(false);}} className="flex w-full items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50">
                 <span className="flex items-center gap-2"><ShoppingCart className="w-4 h-4" /> Cart ({cartItems.length})</span>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </button>
-              <button onClick={()=>{ navigate('/return-policy'); }} className="flex w-full items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50">
+              <button onClick={()=>{ navigate('/return-policy'); setMenuOpen(false); }} className="flex w-full items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50">
                 <span className="flex items-center gap-2"><RefreshCcw className="w-4 h-4" /> Returns Policy</span>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </button>
-              <button onClick={async ()=>{ await logout(); navigate('/'); }} className="flex w-full items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 text-red-600">
+              <button onClick={async ()=>{ await logout(); navigate('/'); setMenuOpen(false); }} className="flex w-full items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 text-red-600">
                 <span className="flex items-center gap-2"><LogOut className="w-4 h-4" /> Logout</span>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </button>

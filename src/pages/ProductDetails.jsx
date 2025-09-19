@@ -16,6 +16,7 @@ import {
   Check,
 } from "lucide-react";
 import { getProductById, listProducts, mapProductOutToUi } from "../services/products";
+import ImageZoom from "../components/ImageZoom";
 import { useCart } from "../context/CartContext";
 import { trackViewItem, trackAddToCart } from "../utils/analytics";
 
@@ -381,27 +382,21 @@ const ProductDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12">
           {/* Product Image */}
           <div className="space-y-4">
-            <div
-              className="aspect-[5/4] bg-white rounded-xl md:rounded-2xl overflow-hidden shadow-md md:shadow-lg max-w-md mx-auto lg:max-w-full relative"
+            <div className="aspect-[5/4] bg-white rounded-xl md:rounded-2xl shadow-md md:shadow-lg max-w-md mx-auto lg:max-w-full relative"
               onTouchStart={onMainImageTouchStart}
               onTouchMove={onMainImageTouchMove}
               onTouchEnd={onMainImageTouchEnd}
               style={{
-                transform: isDragging
-                  ? `translateX(-${dragOffset * 0.5}px)`
-                  : "none",
-                transition: isDragging ? "none" : "transform 0.3s ease-out",
+                transform: isDragging ? `translateX(-${dragOffset * 0.5}px)` : 'none',
+                transition: isDragging ? 'none' : 'transform 0.3s ease-out'
               }}
             >
-              <img
-                src={
-                  product.images && product.images.length > 0
-                    ? product.images[selectedImageIndex]
-                    : product.image
-                }
+              <ImageZoom
+                src={product.images && product.images.length > 0 ? product.images[selectedImageIndex] : product.image}
                 alt={product.title}
-                className="w-full h-full object-cover hover:scale-105 transition-all duration-300 md:duration-500 ease-in-out select-none"
-                draggable={false}
+                zoomScale={2.9}
+                panelWidth={500}
+                panelHeight={500}
               />
 
               {/* Touch sliding indicators - mobile only */}

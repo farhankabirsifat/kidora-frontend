@@ -28,7 +28,7 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { cartItems, wishlistItems } = useCart();
-  const { orders, advanceOrderStatus } = useOrders();
+  const { orders, advanceOrderStatus, loaded, error: ordersError } = useOrders();
   const { user, logout, updateProfile } = useAuth();
   const [activeOrder, setActiveOrder] = useState(orders[0] || null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -94,6 +94,13 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      {/* Show global orders loading state for overview tab when not yet loaded */}
+      {!loaded && section==='overview' && (
+        <div className="mb-4 p-3 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-600 animate-pulse">Loading your orders...</div>
+      )}
+      {loaded && section==='overview' && orders.length===0 && (
+        <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-700">You have no orders yet.</div>
+      )}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
         {/* Sidebar */}
         <div className="lg:col-span-1 space-y-6">

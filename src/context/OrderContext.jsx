@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
 import { OrderContext } from "./OrderContextInternal";
 import { listUserOrders } from "../services/orders";
 
@@ -63,21 +64,33 @@ export const OrderProvider = ({ children }) => {
   const [orders, setOrders] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState('');
+  const { isAuthenticated, user } = useAuth();
 
-  useEffect(() => {
-    let ignore = false;
-    (async () => {
-      try {
-        const data = await listUserOrders();
-        if (!ignore) setOrders(Array.isArray(data) ? data.map(toUiOrder) : []);
-      } catch (e) {
-        if (!ignore) setError(e?.message || 'Failed to load orders');
-      } finally {
-        if (!ignore) setLoaded(true);
-      }
-    })();
-    return () => { ignore = true; };
+  const fetchOrders = useCallback(async () => {
+    setError('');
+    try {
+      const data = await listUserOrders();
+      setOrders(Array.isArray(data) ? data.map(toUiOrder) : []);
+    } catch (e) {
+      setError(e?.message || 'Failed to load orders');
+    } finally {
+      setLoaded(true);
+    }
   }, []);
+
+  // Fetch orders whenever authentication state becomes true (e.g., after first login)
+  useEffect(() => {
+    let cancelled = false;
+    if (!isAuthenticated) {
+      // If user logged out, clear orders and mark loaded
+      setOrders([]);
+      setLoaded(true);
+      return;
+    }
+    setLoaded(false);
+    (async () => { if (!cancelled) await fetchOrders(); })();
+    return () => { cancelled = true; };
+  }, [isAuthenticated, user?.email, fetchOrders]);
 
   const advanceOrderStatus = useCallback((orderId) => {
     setOrders((prev) =>

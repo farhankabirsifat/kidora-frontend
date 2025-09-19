@@ -582,9 +582,15 @@ const ProductDetails = () => {
                   </span>
                 )}
               </div>
-              <p className="text-sm text-green-600">
-                Free shipping on orders above ৳500
-              </p>
+              {product.freeShipping ? (
+                <p className="text-sm text-emerald-600 font-medium flex items-center gap-1">
+                  <Truck className="w-4 h-4" /> This product has free shipping
+                </p>
+              ) : (
+                <p className="text-sm text-emerald-600 font-medium flex items-center gap-1">
+                  <Truck className="w-4 h-4" /> Shipping Charge ৳ 70 inside Dhaka and ৳ 120 outside Dhaka
+                </p>
+              )}
             </div>
 
             {/* Size Selection */}

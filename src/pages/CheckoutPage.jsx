@@ -44,11 +44,17 @@ const CheckoutPage = () => {
     return Number.isFinite(n) ? n : 0;
   };
   const subtotal = useMemo(() => displayedItems.reduce((sum, it) => sum + parseMoney(it.price) * (it.quantity || 1), 0), [displayedItems]);
-  // Shipping: 70 BDT inside Dhaka, 120 BDT outside
+  // Shipping logic:
+  // - If ALL items in selection have freeShipping => shipping = 0
+  // - Else district-based: 70 BDT inside Dhaka, 120 BDT outside
+  // Updated: previously ANY free => free shipping; now stricter ALL free policy.
   const shippingCost = useMemo(() => {
+    if (!displayedItems.length) return 0;
+    const allFree = displayedItems.every(it => it.freeShipping === true);
+    if (allFree) return 0;
     if (!form.city) return 0; // until district selected
     return form.city.toLowerCase() === 'dhaka' ? 70 : 120;
-  }, [form.city]);
+  }, [form.city, displayedItems]);
   const finalTotal = subtotal + shippingCost;
 
   const handleChange = (e) => {

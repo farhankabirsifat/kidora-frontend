@@ -139,6 +139,7 @@ export default function CartProvider({ children }) {
         originalPrice: `৳ ${parseMoney(ui.price).toFixed(0)}`,
         discountPercent: ui.discount || 0,
         category: ui.category,
+          freeShipping: ui.freeShipping || false,
       };
     });
     // Merge: add any locally saved items not in server yet
@@ -166,6 +167,7 @@ export default function CartProvider({ children }) {
             originalPrice: `৳ ${parseMoney(ui.price).toFixed(0)}`,
             discountPercent: ui.discount || 0,
             category: ui.category,
+            freeShipping: ui.freeShipping || false,
           };
         } catch {
           return {
@@ -206,6 +208,7 @@ export default function CartProvider({ children }) {
           category: ui.category,
           selectedSize: ci.selectedSize,
           quantity: ci.quantity,
+          freeShipping: ui.freeShipping || false,
         };
       }
       return {
@@ -289,6 +292,7 @@ export default function CartProvider({ children }) {
           quantity: targetQuantity,
           selectedSize,
           addedAt: new Date().toISOString(),
+          freeShipping: ui.freeShipping || false,
         },
       ];
     });
@@ -314,6 +318,7 @@ export default function CartProvider({ children }) {
             category: ui.category,
             selectedSize: ci.selectedSize,
             quantity: ci.quantity,
+              freeShipping: ui.freeShipping || false,
           };
         }
         return {
@@ -326,6 +331,7 @@ export default function CartProvider({ children }) {
           category: "",
           selectedSize: ci.selectedSize,
           quantity: ci.quantity,
+          freeShipping: false,
         };
       });
   setCartItems(cartUi);
@@ -374,6 +380,29 @@ export default function CartProvider({ children }) {
   const getCartItemsCount = () => {
     return cartItems.reduce((total, item) => total + item.quantity, 0);
   };
+
+  // Backfill freeShipping flag for legacy cart items that might have been stored before feature
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const needs = cartItems.some(it => it.freeShipping === undefined);
+      if (!needs) return;
+      try {
+        const updated = await Promise.all(cartItems.map(async (it) => {
+          if (it.freeShipping !== undefined) return it;
+          try {
+            const p = await getProductById(it.id);
+            const mapped = mapProductOutToUi(p);
+            return { ...it, freeShipping: mapped.freeShipping || false };
+          } catch {
+            return { ...it, freeShipping: false };
+          }
+        }));
+        if (!cancelled) setCartItems(updated);
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, [cartItems]);
 
   // Wishlist functions
   const addToWishlist = async (product) => {

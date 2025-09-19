@@ -40,8 +40,12 @@ const CartPage = () => {
     removeFromCart(item.id, item.selectedSize);
   };
 
-  const shippingCost = getCartTotal() >= 500 ? 0 : 60;
-  const finalTotal = getCartTotal() + shippingCost;
+  // Shipping logic (cart page preview):
+  // - If ALL items have freeShipping => show Free (0)
+  // - Else show Dhaka (70) / Outside (120) guidance (actual district picked at checkout)
+  const allFreeShipping = cartItems.length > 0 && cartItems.every(it => it.freeShipping === true);
+  const shippingCost = allFreeShipping ? 0 : null; // null => depends on district
+  const finalTotal = getCartTotal(); // shipping added later at checkout
 
   // Track view_cart on mount/update
   useEffect(() => {
@@ -255,22 +259,18 @@ const CartPage = () => {
                   <span>৳{getCartTotal()}</span>
                 </div>
 
-                <div className="flex justify-between text-gray-600">
+                <div className="flex justify-between text-gray-600 items-start">
                   <span>Shipping</span>
-                  <span>
-                    {shippingCost === 0 ? (
-                      <span className="text-green-600 font-medium">Free</span>
-                    ) : (
-                      `৳${shippingCost}`
-                    )}
-                  </span>
+                  {shippingCost === 0 ? (
+                    <span className="text-green-600 font-medium">Free</span>
+                  ) : (
+                    <span className="text-xs text-gray-700 text-right leading-snug">
+                      <span className="block font-medium">Dhaka: ৳70</span>
+                      <span className="block font-medium">Outside: ৳120</span>
+                      <span className="block text-[11px] text-gray-500">Calculated at checkout</span>
+                    </span>
+                  )}
                 </div>
-
-                {getCartTotal() < 500 && (
-                  <div className="text-sm text-blue-600 bg-blue-50 p-3 rounded-lg">
-                    Add ৳{500 - getCartTotal()} more for free shipping!
-                  </div>
-                )}
 
                 <div className="border-t pt-4">
                   <div className="flex justify-between text-lg font-semibold text-gray-900">
@@ -307,10 +307,10 @@ const CartPage = () => {
 
               {/* Trust Badges */}
               <div className="mt-8 pt-6 border-t space-y-4">
-                <div className="flex items-center space-x-3 text-sm text-gray-600">
+                {/* <div className="flex items-center space-x-3 text-sm text-gray-600">
                   <Truck className="w-5 h-5 text-green-600" />
                   <span>Free shipping on orders over ৳500</span>
-                </div>
+                </div> */}
                 <div className="flex items-center space-x-3 text-sm text-gray-600">
                   <ShieldCheck className="w-5 h-5 text-blue-600" />
                   <span>Secure payment & 30-day returns</span>

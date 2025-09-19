@@ -36,7 +36,7 @@ export async function listCategoryCounts() {
   return apiClient.get(`${base}/category-counts`);
 }
 
-export async function createProduct({ title, description, price, category, rating = 0, discount = 0, mainImageFile, imageFiles = [], sizes, video } = {}) {
+export async function createProduct({ title, description, price, category, rating = 0, discount = 0, mainImageFile, imageFiles = [], sizes, video, freeShipping = false } = {}) {
   const basic = getBasicCreds();
   const fd = new FormData();
   fd.append('title', title);
@@ -49,12 +49,13 @@ export async function createProduct({ title, description, price, category, ratin
     try { fd.append('sizes_stock', JSON.stringify(sizes)); } catch {}
   }
   if (video) fd.append('video', video);
+  fd.append('free_shipping', String(Boolean(freeShipping)));
   fd.append('mainImage', mainImageFile);
   for (const f of imageFiles) fd.append('images', f);
   return apiClient.post(`${base}/admin`, fd, { auth: { basic } });
 }
 
-export async function updateProduct(id, { title, description, price, category, rating, discount, mainImageFile, imageFiles, sizes, video } = {}) {
+export async function updateProduct(id, { title, description, price, category, rating, discount, mainImageFile, imageFiles, sizes, video, freeShipping } = {}) {
   const basic = getBasicCreds();
   const fd = new FormData();
   if (title !== undefined) fd.append('title', title);
@@ -67,6 +68,7 @@ export async function updateProduct(id, { title, description, price, category, r
     try { fd.append('sizes_stock', JSON.stringify(sizes)); } catch {}
   }
   if (video !== undefined) fd.append('video', video ?? '');
+  if (freeShipping !== undefined) fd.append('free_shipping', String(Boolean(freeShipping)));
   if (mainImageFile) fd.append('main_image', mainImageFile);
   if (Array.isArray(imageFiles)) {
     for (const f of imageFiles) fd.append('images', f);
@@ -99,6 +101,7 @@ export function mapProductOutToUi(p) {
     discount: p.discount ?? 0,
     video: p.video || '',
     sizes: p.sizes_stock || null,
+    freeShipping: p.free_shipping || false,
     image: toFullUrl(primary),
     images: images.map(toFullUrl),
     _raw: p,

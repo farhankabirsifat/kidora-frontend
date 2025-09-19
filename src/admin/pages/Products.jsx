@@ -68,7 +68,8 @@ export default function Products() {
     images: [], // array of object URL previews for additional images
     _imageFile: null, // internal file ref (not persisted externally)
     _imageFiles: [], // internal file refs
-    sizes: { XS:'', S:'', M:'', L:'', XL:'', XXL:'' }
+    sizes: { XS:'', S:'', M:'', L:'', XL:'', XXL:'' },
+    freeShipping: false,
   });
   const additionalImagesInputRef = useRef(null);
   const [openEdit, setOpenEdit] = useState(false);
@@ -136,11 +137,12 @@ export default function Products() {
         mainImageFile: newProduct._imageFile,
         imageFiles: newProduct._imageFiles,
         sizes: sizesClean,
+        freeShipping: newProduct.freeShipping,
       });
       const mapped = mapProductOutToUi(created);
       setProducts(prev => [mapped, ...prev]);
     // reset
-    setNewProduct({ title: '', price: '', rating: '', category: '', discount: '', description: '', video: '', image: '', images: [], _imageFile: null, _imageFiles: [], sizes: { XS:'', S:'', M:'', L:'', XL:'', XXL:'' } });
+  setNewProduct({ title: '', price: '', rating: '', category: '', discount: '', description: '', video: '', image: '', images: [], _imageFile: null, _imageFiles: [], sizes: { XS:'', S:'', M:'', L:'', XL:'', XXL:'' }, freeShipping: false });
       setOpenNew(false);
     }catch(e){ setError(e?.message || 'Failed to create product'); }
   };
@@ -219,7 +221,7 @@ export default function Products() {
     for(const k of Object.keys(initialSizes||{})){
       if(k in norm) norm[k] = String(initialSizes[k] ?? '');
     }
-    setEditProduct({ ...product, featureInput:'', _imageFile:null, _imageFiles:[], sizes: norm });
+  setEditProduct({ ...product, featureInput:'', _imageFile:null, _imageFiles:[], sizes: norm, freeShipping: product.freeShipping || false });
     setOpenEdit(true);
   };
 
@@ -241,6 +243,7 @@ export default function Products() {
         mainImageFile: _imageFile || undefined,
         imageFiles: _imageFiles && _imageFiles.length ? _imageFiles : undefined,
         sizes: sizesClean,
+        freeShipping: clean.freeShipping,
       });
       const mapped = mapProductOutToUi(updated);
       setProducts(prev => prev.map(p=>p.id===mapped.id ? mapped : p));
@@ -344,6 +347,7 @@ export default function Products() {
                 <th className="py-2 pr-4 font-medium">Cat.</th>
                 <th className="py-2 pr-4 font-medium cursor-pointer" onClick={()=>toggleSort('rating')}>Rating {sortKey==='rating' && (sortDir==='asc'?'▲':'▼')}</th>
                 <th className="py-2 pr-4 font-medium">Disc%</th>
+    <th className="py-2 pr-4 font-medium">Free Ship</th>
                 <th className="py-2 pr-4 font-medium">Status</th>
 		<th className="py-2 pr-4 font-medium">Actions</th>
               </tr>
@@ -379,6 +383,7 @@ export default function Products() {
                   <td className="py-2 pr-4 whitespace-nowrap capitalize">{p.category||'-'}</td>
                   <td className="py-2 pr-4 w-20">{p.rating || 0}</td>
                   <td className="py-2 pr-4 w-20">{p.discount || 0}</td>
+                  <td className="py-2 pr-4 text-xs">{p.freeShipping ? <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 font-medium">Yes</span> : <span className="text-gray-400">No</span>}</td>
                   <td className="py-2 pr-4">{statusBadge(p)}</td>
                   <td className="py-2 pr-4 flex gap-2">
 		  <Button variant="outline" onClick={()=>openEditModal(p)}>Edit</Button>
@@ -452,6 +457,10 @@ export default function Products() {
               <div>
                 <label className="text-[11px] font-medium text-gray-600 mb-1">Discount %</label>
                 <Input type="number" value={newProduct.discount} onChange={e=>setNewProduct(p=>({...p,discount:e.target.value}))} />
+              </div>
+              <div className="flex items-center gap-2 pt-5">
+                <input id="newFreeShip" type="checkbox" checked={newProduct.freeShipping} onChange={e=>setNewProduct(p=>({...p, freeShipping:e.target.checked}))} />
+                <label htmlFor="newFreeShip" className="text-[11px] font-medium text-gray-600">Free Shipping</label>
               </div>
             </div>
           </div>
@@ -578,6 +587,10 @@ export default function Products() {
                 <div>
                   <label className="text-[11px] font-medium text-gray-600 mb-1">Video (embed URL)</label>
                   <Input value={editProduct.video} onChange={e=>setEditProduct(p=>({...p,video:e.target.value}))} placeholder="https://www.youtube.com/embed/..." />
+                </div>
+                <div className="flex items-center gap-2 pt-5">
+                  <input id="editFreeShip" type="checkbox" checked={editProduct.freeShipping} onChange={e=>setEditProduct(p=>({...p, freeShipping:e.target.checked}))} />
+                  <label htmlFor="editFreeShip" className="text-[11px] font-medium text-gray-600">Free Shipping</label>
                 </div>
               </div>
             </div>

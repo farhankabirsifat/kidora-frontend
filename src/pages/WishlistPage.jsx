@@ -132,7 +132,6 @@ const WishlistPage = () => {
                   loading="lazy"
                   onError={(e) => {
                     console.log('Image failed to load:', item.image);
-                    // Set a placeholder image if the original fails
                     e.currentTarget.src = 'https://via.placeholder.com/300x400/f3f4f6/9ca3af?text=Image+Not+Found';
                   }}
                 />

@@ -32,7 +32,7 @@ export default function ProfilePage() {
   const { user, logout, updateProfile } = useAuth();
   const [activeOrder, setActiveOrder] = useState(orders[0] || null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [section, setSection] = useState('overview'); // 'overview' | 'account' | 'edit'
+  const [section, setSection] = useState('overview'); // 'overview' | 'account' | 'edit' | 'returns'
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
@@ -69,7 +69,10 @@ export default function ProfilePage() {
   useEffect(() => {
     const usp = new URLSearchParams(location.search);
     const tab = usp.get('tab');
-    if (tab === 'edit') {
+    if (tab === 'returns') {
+      setSection('returns');
+      setEditing(false);
+    } else if (tab === 'edit') {
       setSection('edit');
       setEditing(true);
       // Initialize form from user
@@ -132,8 +135,8 @@ export default function ProfilePage() {
                 <span className="flex items-center gap-2"><ShoppingCart className="w-4 h-4" /> Cart ({cartItems.length})</span>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </button>
-              <button className="flex w-full items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50">
-                <span className="flex items-center gap-2"><RefreshCcw className="w-4 h-4" /> Returns</span>
+              <button onClick={()=>{ navigate('/return-policy'); }} className="flex w-full items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50">
+                <span className="flex items-center gap-2"><RefreshCcw className="w-4 h-4" /> Returns Policy</span>
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </button>
               <button onClick={async ()=>{ await logout(); navigate('/'); }} className="flex w-full items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 text-red-600">

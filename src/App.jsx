@@ -14,6 +14,7 @@ import SearchPage from "./pages/SearchPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import ProfilePage from "./pages/ProfilePage";
 import OrdersPage from "./pages/OrdersPage";
+import ReturnPolicyPage from "./pages/ReturnPolicyPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -75,6 +76,7 @@ function AppShell() {
           <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
           <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
           <Route path="/orders" element={<PrivateRoute><OrdersPage /></PrivateRoute>} />
+          <Route path="/return-policy" element={<PrivateRoute><ReturnPolicyPage /></PrivateRoute>} />
           <Route path="/districts" element={<DistrictsPage />} />
           <Route path="/404" element={<NotFound />} />
 

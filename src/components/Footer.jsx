@@ -29,10 +29,13 @@ const Footer = () => {
               </li>
               <li>
                 <a
-                  href="#"
+                  href="https://wa.me/8801894800865?text=Hello%20Kidora%2C%20I%20need%20assistance"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-gray-300 hover:text-white transition-colors"
+                  aria-label="Chat on WhatsApp"
                 >
-                  Contact
+                  Contact (WhatsApp)
                 </a>
               </li>
               <li>
@@ -119,19 +122,11 @@ const Footer = () => {
             </div>
 
             <h4 className="text-sm font-semibold mb-2">Payment Methods</h4>
-            <div className="flex space-x-2">
-              <div className="bg-blue-600 text-white px-2 py-1 rounded text-xs">
-                COD
-              </div>
-              <div className="bg-red-600 text-white px-2 py-1 rounded text-xs">
-                bKash
-              </div>
-              <div className="bg-blue-800 text-white px-2 py-1 rounded text-xs">
-                Nogod
-              </div>
-              <div className="bg-yellow-500 text-black px-2 py-1 rounded text-xs">
-                Rocket
-              </div>
+            <div className="flex items-center space-x-3">
+              <div className="bg-white text-black px-3 py-1 rounded text-md font-bold tracking-wide">COD</div>
+              <img src="/bkash.png" alt="bKash" className="h-8 w-auto object-contain rounded-sm shadow-sm bg-white p-0.5" loading="lazy" />
+              <img src="/nogod.png" alt="Nagad" className="h-8 w-auto object-contain rounded-sm shadow-sm bg-white p-0.5" loading="lazy" />
+              <img src="/rocket.png" alt="Rocket" className="h-8 w-auto object-contain rounded-sm shadow-sm bg-white p-0.5" loading="lazy" />
             </div>
           </div>
         </div>

@@ -120,45 +120,33 @@ const WishlistPage = () => {
               key={item.id}
               className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 group"
             >
-              {/* Product Image */}
-              <div
-                className="relative aspect-square bg-gray-100 cursor-pointer overflow-hidden"
-                onClick={() => navigate(`/product/${item.id}`)}
-              >
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  loading="lazy"
-                  onError={(e) => {
-                    console.log('Image failed to load:', item.image);
-                    e.currentTarget.src = 'https://via.placeholder.com/300x400/f3f4f6/9ca3af?text=Image+Not+Found';
-                  }}
-                />
-
-                {/* Remove from Wishlist Button */}
+              {/* Product Image (cart style) */}
+              <div className="relative">
+                <div
+                  className="w-full h-40 bg-gray-100 rounded-lg overflow-hidden cursor-pointer mx-auto"
+                  onClick={() => navigate(`/product/${item.id}`)}
+                >
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                    onError={(e) => {
+                      console.log('Wishlist image failed:', item.image);
+                      e.currentTarget.src = 'https://via.placeholder.com/300x300/f3f4f6/9ca3af?text=No+Image';
+                    }}
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+              {/* Remove + overlay retained below original image area */}
+              <div className="relative h-0">
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemoveFromWishlist(item);
-                  }}
-                  className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center text-red-600 hover:bg-red-50 transition-colors duration-200"
+                  onClick={(e) => { e.stopPropagation(); handleRemoveFromWishlist(item); }}
+                  className="absolute top-3 right-4 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center text-red-600 hover:bg-red-50 transition-colors duration-200"
+                  title="Remove from wishlist"
                 >
                   <Heart className="w-4 h-4 fill-current" />
                 </button>
-
-                {/* Quick Add to Cart Overlay */}
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAddToCart(item);
-                    }}
-                    className="bg-white text-gray-900 px-4 py-2 rounded-lg font-medium opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 shadow-lg hover:shadow-xl"
-                  >
-                    Quick Add to Cart
-                  </button>
-                </div>
               </div>
 
               {/* Product Details */}

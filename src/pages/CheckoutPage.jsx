@@ -288,7 +288,7 @@ const CheckoutPage = () => {
                   <input type="radio" name="payment" value="online" className="mt-1" checked={paymentMethod==='online'} onChange={()=>setPaymentMethod('online')} />
                   <div>
                     <p className="font-medium text-gray-900">Online Payment</p>
-                    <p className="text-xs text-gray-600">(Demo) Pretend to pay now</p>
+                    <p className="text-xs text-gray-600">Pretend to pay now</p>
                   </div>
                 </label>
               </div>
@@ -306,7 +306,7 @@ const CheckoutPage = () => {
                         className={`relative p-3 rounded-lg border text-left transition flex flex-col gap-1 ${paymentProvider===key ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
                       >
                         <span className="text-sm font-semibold text-gray-900">{acc.label}</span>
-                        <span className="text-xs font-mono tracking-wide text-gray-600">{acc.number}</span>
+                        <span className="text-lg font-mono tracking-wide text-black">{acc.number}</span>
                         <span className="text-[10px] uppercase text-gray-500">{acc.instructions}</span>
                         {paymentProvider===key && <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-blue-500" />}
                       </button>

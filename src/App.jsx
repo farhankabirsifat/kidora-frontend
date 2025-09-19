@@ -24,6 +24,7 @@ import HeroBanners from "./admin/pages/HeroBanners";
 import AdminOrders from "./admin/pages/Orders";
 import Customers from "./admin/pages/Customers";
 import CustomerOrders from './admin/pages/CustomerOrders';
+import DistrictsPage from './pages/DistrictsPage';
 import "./App.css";
 
 // Route guards
@@ -69,6 +70,7 @@ function AppShell() {
           <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
           <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
           <Route path="/orders" element={<PrivateRoute><OrdersPage /></PrivateRoute>} />
+          <Route path="/districts" element={<DistrictsPage />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
             <Route index element={<Dashboard />} />

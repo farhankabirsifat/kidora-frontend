@@ -4,6 +4,8 @@ import { useCart } from "../context/CartContext";
 import { ArrowLeft, ShoppingBag } from "lucide-react";
 import { trackBeginCheckout, trackPurchase } from "../utils/analytics";
 import { createUserOrder } from "../services/orders";
+import { bdDistricts } from "../data/bdDistricts"; // still used maybe later; can remove if unused
+import DistrictAutocomplete from "../components/DistrictAutocomplete";
 import { useOrders } from "../context/useOrders";
 
 const CheckoutPage = () => {
@@ -210,17 +212,11 @@ const CheckoutPage = () => {
                     placeholder="House, road, area"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm text-gray-700 mb-1">City*</label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={form.city}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Dhaka"
-                  />
-                </div>
+                <DistrictAutocomplete
+                  value={form.city}
+                  onChange={(val)=>setForm(prev=>({...prev, city: val}))}
+                  required
+                />
                 <div>
                   <label className="block text-sm text-gray-700 mb-1">
                     Postal Code

@@ -5,7 +5,7 @@ const decode = (b64) => {
   try {
     return atob(b64);
   } catch {
-    return "Kidora";
+    return "softwareseba";
   }
 };
 

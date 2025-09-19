@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import PasswordField from '../components/PasswordField';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -25,7 +26,7 @@ export default function LoginPage() {
 
   return (
     <div className="py-16">
-      <div className="max-w-md mx-auto bg-white shadow rounded-2xl p-8 border border-gray-100">
+      <div className="max-w-sm mx-auto bg-white shadow rounded-2xl p-8 border border-gray-100">
         <div className="pb-6 flex justify-center">
           <Link to="/" aria-label="Go to homepage">
             <img src="/Kidora-logo.png" alt="Kidora" className="h-18 cursor-pointer" />
@@ -39,8 +40,10 @@ export default function LoginPage() {
             <input type="email" className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={email} onChange={e=>setEmail(e.target.value)} required />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
-            <input type="password" className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={password} onChange={e=>setPassword(e.target.value)} required />
+            <PasswordField label="Password" value={password} onChange={e=>setPassword(e.target.value)} />
+            <div className="text-right mt-1">
+              <Link to="/forgot-password" className="text-xs text-blue-600 hover:underline">Forgot password?</Link>
+            </div>
           </div>
           <button disabled={loading} className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50">{loading ? 'Signing in…' : 'Sign in'}</button>
         </form>

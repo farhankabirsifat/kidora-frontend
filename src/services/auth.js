@@ -61,6 +61,15 @@ export async function logout() {
   clearToken(); clearUser(); clearBasicCreds();
 }
 
+// Password reset (OTP code flow)
+export async function requestPasswordReset(email) {
+  return apiClient.post('/api/auth/password/forgot', { email });
+}
+
+export async function resetPassword({ email, code, newPassword }) {
+  return apiClient.post('/api/auth/password/reset', { email, code, newPassword });
+}
+
 // Centralized admin email check (keep in sync with backend is_admin_email).
 // Primary admin now: kidorabd@gmail.com. Optionally support a runtime list exposed via window.__ADMIN_EMAILS__.
 export function isAdminEmail(email) {

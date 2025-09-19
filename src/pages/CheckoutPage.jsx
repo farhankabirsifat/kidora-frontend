@@ -28,6 +28,10 @@ const CheckoutPage = () => {
   const [senderNumber, setSenderNumber] = useState("");
   const [transactionId, setTransactionId] = useState("");
 
+  // Submission / cooldown state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cooldown, setCooldown] = useState(0); // seconds remaining
+
   const [paymentAccounts, setPaymentAccounts] = useState({
     bkash: { label: 'bKash', number: '', instructions: 'Send Money (Personal)' },
     nagad: { label: 'Nagad', number: '', instructions: 'Send Money (Personal)' },
@@ -65,8 +69,13 @@ const CheckoutPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Prevent double submit or during cooldown
+    if (isSubmitting || cooldown > 0) return;
+
+    setIsSubmitting(true);
     if (!form.fullName || !form.phone || !form.address || !form.city) {
       alert("Please fill in all required fields.");
+      setIsSubmitting(false);
       return;
     }
     const items = displayedItems.map((it) => ({
@@ -119,6 +128,10 @@ const CheckoutPage = () => {
       navigate('/orders');
     } catch (err) {
       alert(err?.message || 'Failed to place order');
+    } finally {
+      // Start a 5 second cooldown regardless of success (will usually navigate away on success)
+      setIsSubmitting(false);
+      setCooldown(5);
     }
   };
   // Ensure begin_checkout tracked if user lands directly here
@@ -150,6 +163,15 @@ const CheckoutPage = () => {
       }
     })();
   },[]);
+
+  // Cooldown countdown effect
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const id = setInterval(() => {
+      setCooldown((c) => (c > 0 ? c - 1 : 0));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [cooldown]);
 
   if (!isBuyNow && cartItems.length === 0) {
     return (
@@ -354,9 +376,14 @@ const CheckoutPage = () => {
               </button>
               <button
                 type="submit"
-                className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700"
+                disabled={isSubmitting || cooldown > 0}
+                className={`flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${!(isSubmitting || cooldown>0) ? 'hover:bg-blue-700' : ''}`}
               >
-                {paymentMethod === 'cod' ? 'Place Order (COD)' : 'Pay & Place Order'}
+                {isSubmitting
+                  ? 'Placing...'
+                  : cooldown > 0
+                    ? `Wait ${cooldown}s`
+                    : (paymentMethod === 'cod' ? 'Place Order (COD)' : 'Pay & Place Order')}
               </button>
             </div>
           </form>

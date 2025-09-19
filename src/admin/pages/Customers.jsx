@@ -74,7 +74,7 @@ export default function Customers() {
           ) : filtered.map(u => (
             <div key={u.id} className="grid md:grid-cols-12 gap-4 px-4 py-4 text-sm items-center">
               <div className="md:col-span-1 font-medium text-gray-900">{u.id}</div>
-              <div className="md:col-span-3 cursor-pointer" onClick={()=>navigate(`/admin/customers/${u.id}`)}>
+              <div className="md:col-span-3 cursor-pointer" onClick={()=>navigate(`/kidora-admin/customers/${u.id}`)}>
                 <p className="font-medium text-blue-600 hover:underline">{u.firstName || u.lastName ? `${u.firstName||''} ${u.lastName||''}`.trim() : '—'}</p>
                 <p className="text-[11px] text-gray-500 md:hidden break-all">{u.email}</p>
               </div>

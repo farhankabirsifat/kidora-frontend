@@ -52,7 +52,7 @@ export default function CustomerOrders() {
   return (
     <div className="p-4">
       <div className="mb-4 flex items-center gap-4">
-        <Link to="/admin/customers" className="text-sm text-blue-600 hover:underline">← Back to Customers</Link>
+        <Link to="/kidora-admin/customers" className="text-sm text-blue-600 hover:underline">← Back to Customers</Link>
         <h2 className="text-xl font-semibold">Customer Orders</h2>
       </div>
       {loading && <div>Loading...</div>}

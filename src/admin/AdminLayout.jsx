@@ -5,11 +5,11 @@ import { useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 const navItems = [
-  { to: '/admin', label: 'Dashboard' },
-  { to: '/admin/products', label: 'Products' },
-  { to: '/admin/hero', label: 'Hero Section' },
-  { to: '/admin/orders', label: 'Orders' },
-  { to: '/admin/customers', label: 'Customers Info' },
+  { to: '/kidora-admin', label: 'Dashboard' },
+  { to: '/kidora-admin/products', label: 'Products' },
+  { to: '/kidora-admin/hero', label: 'Hero Section' },
+  { to: '/kidora-admin/orders', label: 'Orders' },
+  { to: '/kidora-admin/customers', label: 'Customers Info' },
 ];
 
 export default function AdminLayout() {
@@ -56,7 +56,7 @@ export default function AdminLayout() {
         <p className="text-gray-600 mb-6">You don't have permission to view the Admin Dashboard.</p>
         <div className="flex gap-3">
           <button onClick={()=>navigate('/')} className="px-4 py-2 rounded bg-gray-900 text-white text-sm">Go Home</button>
-          <button onClick={()=>navigate('/admin/login')} className="px-4 py-2 rounded border border-gray-300 text-sm">Admin Login</button>
+          <button onClick={()=>navigate('/kidora-admin/login')} className="px-4 py-2 rounded border border-gray-300 text-sm">Admin Login</button>
         </div>
       </div>
     );
@@ -80,7 +80,7 @@ export default function AdminLayout() {
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.to === '/admin'}
+              end={item.to === '/kidora-admin'}
               className={({ isActive }) => `block px-3 py-2.5 rounded-lg text-sm font-medium transition ${isActive ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
               onClick={()=>setSidebarOpen(false)}
             >
@@ -113,7 +113,7 @@ export default function AdminLayout() {
               <p className="font-semibold text-gray-900 leading-tight text-sm">{user?.firstName || 'Admin'}</p>
               <p className="text-[10px] sm:text-xs text-gray-500">{user?.email}</p>
             </div>
-            <Button variant="outline" className="hidden sm:inline-flex" onClick={async ()=>{ await logout(); navigate('/admin/login', { replace: true }); }}>Logout</Button>
+            <Button variant="outline" className="hidden sm:inline-flex" onClick={async ()=>{ await logout(); navigate('/kidora-admin/login', { replace: true }); }}>Logout</Button>
           </div>
         </header>
         <main className="flex-1 p-4 sm:p-6 lg:p-10 space-y-8">

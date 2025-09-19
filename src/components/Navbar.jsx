@@ -219,7 +219,7 @@ const Navbar = () => {
             {/* Admin Panel (only for admin accounts) */}
             {isAdmin && (
               <button
-                onClick={() => navigate("/admin")}
+                onClick={() => navigate("/kidora-admin")}
                 className="px-3 py-1 rounded-full bg-blue-600 text-white text-sm font-semibold hover:shadow transition-colors"
               >
                 Admin
@@ -407,7 +407,7 @@ const Navbar = () => {
                 {/* Admin Panel (only for admin accounts) */}
                 {isAdmin && (
                   <button
-                    onClick={() => { setIsMobileMenuOpen(false); navigate("/admin"); }}
+                    onClick={() => { setIsMobileMenuOpen(false); navigate("/kidora-admin"); }}
                     className="col-span-2 flex flex-col items-center space-y-2 p-4 rounded-lg bg-blue-600 hover:shadow transition-colors border border-purple-200"
                   >
                     <span className="text-sm font-semibold text-white">Admin Panel</span>

@@ -26,6 +26,8 @@ import AdminOrders from "./admin/pages/Orders";
 import Customers from "./admin/pages/Customers";
 import CustomerOrders from './admin/pages/CustomerOrders';
 import DistrictsPage from './pages/DistrictsPage';
+import AdminAccessDenied from "./admin/AdminAccessDenied";
+import NotFound from "./pages/NotFound";
 import "./App.css";
 
 // Route guards
@@ -44,14 +46,14 @@ function PublicRoute({ children }) {
 function AdminRoute({ children }) {
   const { isAdmin: isAdminUser, loading } = useAuth();
   if (loading) return null;
-  return isAdminUser ? children : <Navigate to="/admin/login" replace />;
+  return isAdminUser ? children : <AdminAccessDenied />;
 }
 
 function AppShell() {
   const location = useLocation();
   const pathname = location.pathname;
-  const isAdmin = pathname.startsWith('/admin');
-  const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname === '/forgot-password';
+  const isAdmin = pathname.startsWith('/kidora-admin');
+  const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname === '/forgot-password' || pathname === '/404';
   const { loading } = useAuth();
   if (loading) return null;
   return (
@@ -60,6 +62,7 @@ function AppShell() {
       {!isAdmin && !isAuthPage && <Navbar />}
       <div className="flex-1">
         <Routes>
+          {/* Public & user routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/category/:categoryName" element={<CategoryPage />} />
           <Route path="/product/:productId" element={<ProductDetails />} />
@@ -73,15 +76,24 @@ function AppShell() {
           <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
           <Route path="/orders" element={<PrivateRoute><OrdersPage /></PrivateRoute>} />
           <Route path="/districts" element={<DistrictsPage />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+          <Route path="/404" element={<NotFound />} />
+
+          {/* Admin auth */}
+          <Route path="/kidora-admin/login" element={<AdminLogin />} />
+
+          {/* New admin base path */}
+          <Route path="/kidora-admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
             <Route index element={<Dashboard />} />
             <Route path="products" element={<Products />} />
             <Route path="hero" element={<HeroBanners />} />
             <Route path="orders" element={<AdminOrders />} />
             <Route path="customers" element={<Customers />} />
             <Route path="customers/:userId" element={<CustomerOrders />} />
+            <Route path="*" element={<Navigate to="/404" replace state={{ originalPath: location.pathname }} />} />
           </Route>
+
+          {/* Global catch-all (must stay last) */}
+          <Route path="*" element={<Navigate to="/404" replace state={{ originalPath: location.pathname }} />} />
         </Routes>
       </div>
       {!isAdmin && !isAuthPage && <Footer />}

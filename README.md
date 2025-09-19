@@ -42,4 +42,4 @@ The admin route protection now relies on `AuthContext` providing an `isAdmin` bo
 1. `user.role` (if returned by backend and in [`ADMIN`, `SUB_ADMIN`])
 2. Fallback email check via `isAdminEmail()`
 
-`AdminRoute` (in `App.jsx`) enforces this for `/admin` paths, and `AdminLayout` contains an internal defensive check that renders an Unauthorized screen if somehow reached without proper privileges.
+`AdminRoute` (in `App.jsx`) now enforces this for `/kidora-admin` paths (legacy `/admin` routes have been removed). `AdminLayout` also contains an internal defensive check that renders an Unauthorized screen if somehow reached without proper privileges.

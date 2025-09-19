@@ -9,14 +9,14 @@ const navItems = [
   { to: '/admin/products', label: 'Products' },
   { to: '/admin/hero', label: 'Hero Section' },
   { to: '/admin/orders', label: 'Orders' },
-  { to: '/admin/customers', label: 'Customers' },
+  { to: '/admin/customers', label: 'Customers Info' },
 ];
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
-  const { logout } = useAuth();
+  const { logout, user, isAdmin } = useAuth();
 
   // Close on ESC key
   const handleKey = useCallback((e)=>{
@@ -48,6 +48,20 @@ export default function AdminLayout() {
     document.addEventListener('mousedown', handler);
     return ()=>document.removeEventListener('mousedown', handler);
   },[sidebarOpen]);
+  // Defensive: if somehow rendered without admin guard, show fallback.
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+        <h1 className="text-2xl font-bold mb-2">Unauthorized</h1>
+        <p className="text-gray-600 mb-6">You don't have permission to view the Admin Dashboard.</p>
+        <div className="flex gap-3">
+          <button onClick={()=>navigate('/')} className="px-4 py-2 rounded bg-gray-900 text-white text-sm">Go Home</button>
+          <button onClick={()=>navigate('/admin/login')} className="px-4 py-2 rounded border border-gray-300 text-sm">Admin Login</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex bg-gray-100">
       {/* Sidebar */}
@@ -96,8 +110,8 @@ export default function AdminLayout() {
           </div>
           <div className="flex items-center gap-4">
             <div className="hidden xs:block text-right">
-              <p className="font-semibold text-gray-900 leading-tight text-sm">Admin User</p>
-              <p className="text-[10px] sm:text-xs text-gray-500">admin@kidora.dev</p>
+              <p className="font-semibold text-gray-900 leading-tight text-sm">{user?.firstName || 'Admin'}</p>
+              <p className="text-[10px] sm:text-xs text-gray-500">{user?.email}</p>
             </div>
             <Button variant="outline" className="hidden sm:inline-flex" onClick={async ()=>{ await logout(); navigate('/admin/login', { replace: true }); }}>Logout</Button>
           </div>

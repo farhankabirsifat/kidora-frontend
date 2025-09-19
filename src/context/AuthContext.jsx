@@ -50,7 +50,10 @@ export function AuthProvider({ children }) {
   }
 
   const isAuthenticated = !!(user && (getBasicCreds() || getToken()));
-  const isAdmin = isAuthenticated && isAdminEmail(user?.email);
+  // Prefer backend-provided role if available, else email heuristic.
+  const isAdmin = isAuthenticated && (
+    (user?.role && ['ADMIN','SUB_ADMIN'].includes(user.role)) || isAdminEmail(user?.email)
+  );
 
   const value = useMemo(() => ({ user, isAuthenticated, isAdmin, login, signup, logout, updateProfile, loading }), [user, isAuthenticated, isAdmin, loading]);
 

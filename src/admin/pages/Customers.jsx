@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { listAdminUsers, updateUserRole } from '../../services/adminUsers';
 import Button from '../components/ui/Button';
@@ -83,11 +84,24 @@ export default function Customers() {
                 <span className={`inline-flex items-center text-[10px] font-semibold px-2 py-1 rounded-full ${u.role==='ADMIN' ? 'bg-red-100 text-red-700': u.role==='SUB_ADMIN' ? 'bg-amber-100 text-amber-700':'bg-gray-100 text-gray-700'}`}>{u.role}</span>
               </div>
               <div className="md:col-span-2 flex md:justify-end gap-2">
-                {['USER','SUB_ADMIN','ADMIN'].map(r => (
-                  <Button key={r} size="sm" variant={u.role===r? 'solid':'outline'} disabled={updatingId===u.id} onClick={()=>changeRole(u.id, r)} className="text-[11px] px-2 py-1">
-                    {r.replace('_',' ')}
-                  </Button>
-                ))}
+                {u.role === 'ADMIN' ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-md bg-red-50 text-red-600 border border-red-200 select-none">
+                    <Lock className="w-3.5 h-3.5" /> Admin Locked
+                  </span>
+                ) : (
+                  ['USER','SUB_ADMIN'].map(r => (
+                    <Button
+                      key={r}
+                      size="sm"
+                      variant={u.role===r? 'solid':'outline'}
+                      disabled={updatingId===u.id}
+                      onClick={()=>changeRole(u.id, r)}
+                      className="text-[11px] px-2 py-1"
+                    >
+                      {r.replace('_',' ')}
+                    </Button>
+                  ))
+                )}
               </div>
             </div>
           ))}

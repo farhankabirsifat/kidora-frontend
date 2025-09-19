@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { isAdminEmail } from '../services/auth';
 
 export default function AdminLogin() {
   const { login } = useAuth();
-  const [email, setEmail] = useState('admin@example.com');
+  const [email, setEmail] = useState('kidorabd@gmail.com');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -14,9 +15,7 @@ export default function AdminLogin() {
     e.preventDefault(); setError(''); setLoading(true);
     try {
       await login(email, password);
-      if (!email.endsWith('@admin') && email !== 'admin@example.com') {
-        throw new Error('Not an admin account');
-      }
+      if (!isAdminEmail(email)) throw new Error('Not an admin account');
       navigate('/admin', { replace: true });
     } catch (e) {
       setError(e?.message || 'Admin login failed');

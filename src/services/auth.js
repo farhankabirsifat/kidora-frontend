@@ -61,6 +61,19 @@ export async function logout() {
   clearToken(); clearUser(); clearBasicCreds();
 }
 
+// Centralized admin email check (keep in sync with backend is_admin_email).
+// Primary admin now: kidorabd@gmail.com. Optionally support a runtime list exposed via window.__ADMIN_EMAILS__.
 export function isAdminEmail(email) {
-  return email === 'admin@example.com' || email?.endsWith('@admin');
+  if (!email) return false;
+  const lowered = email.toLowerCase();
+  // Allow backend to inject a list (e.g. via script tag) to avoid hardcoding in bundle.
+  const dynamicList = (window.__ADMIN_EMAILS__ || []).map(e => String(e).toLowerCase());
+  if (dynamicList.length && dynamicList.includes(lowered)) return true;
+  // Built-in known primary admin(s)
+  const builtin = [
+    'kidorabd@gmail.com', // primary configured admin
+  ];
+  if (builtin.includes(lowered)) return true;
+  // Legacy fallbacks removed: only explicit configured emails are admin.
+  return false;
 }

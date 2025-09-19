@@ -1,9 +1,11 @@
 import { useEffect, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { listAdminUsers, updateUserRole } from '../../services/adminUsers';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 
 export default function Customers() {
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -42,7 +44,7 @@ export default function Customers() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h2 className="text-xl font-semibold text-gray-900">Customers</h2>
+        <h2 className="text-xl font-semibold text-gray-900">Customers Info.</h2>
         <div className="flex gap-3">
           <Input placeholder="Search email or name" value={query} onChange={e=>setQuery(e.target.value)} className="w-56" />
           <select value={roleFilter} onChange={e=>setRoleFilter(e.target.value)} className="border rounded-md px-2 py-2 text-sm bg-white">
@@ -71,8 +73,8 @@ export default function Customers() {
           ) : filtered.map(u => (
             <div key={u.id} className="grid md:grid-cols-12 gap-4 px-4 py-4 text-sm items-center">
               <div className="md:col-span-1 font-medium text-gray-900">{u.id}</div>
-              <div className="md:col-span-3">
-                <p className="font-medium text-gray-900">{u.firstName || u.lastName ? `${u.firstName||''} ${u.lastName||''}`.trim() : '—'}</p>
+              <div className="md:col-span-3 cursor-pointer" onClick={()=>navigate(`/admin/customers/${u.id}`)}>
+                <p className="font-medium text-blue-600 hover:underline">{u.firstName || u.lastName ? `${u.firstName||''} ${u.lastName||''}`.trim() : '—'}</p>
                 <p className="text-[11px] text-gray-500 md:hidden break-all">{u.email}</p>
               </div>
               <div className="md:col-span-3 hidden md:block break-all">{u.email}</div>

@@ -15,6 +15,12 @@ export async function updateOrderStatus(id, status) {
   return apiClient.put(`${base}/${id}/status`, { status }, { auth: { basic } });
 }
 
+export async function listAdminOrdersByUser(userId) {
+  const basic = getBasicCreds();
+  // apiClient already returns parsed JSON body (array of orders)
+  return apiClient.get(`/api/admin/orders/by-user/${userId}`, { auth: { basic } });
+}
+
 export async function updatePaymentStatus(id, paymentStatus) {
   const basic = getBasicCreds();
   return apiClient.put(`${base}/${id}/payment-status`, { paymentStatus }, { auth: { basic } });

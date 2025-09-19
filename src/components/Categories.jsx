@@ -3,26 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { listCategoryCounts } from "../services/products";
 
 // Info box components (same code as before, just separated)
-const WomenInfoBox = ({ name, items }) => (
-  <div className="absolute bottom-35 left-65 bg-white rounded-lg px-6 py-4 shadow-sm">
-    <h3 className="font-semibold text-xl text-gray-900 mb-2">{name}</h3>
-    <p className="text-sm text-gray-500 font-medium">{items}</p>
-  </div>
-);
-
-const MenInfoBox = ({ name, items }) => (
-  <div className="absolute bottom-35 right-50 bg-white rounded-lg px-6 py-4 shadow-sm">
-    <h3 className="font-semibold text-xl text-gray-900 mb-2">{name}</h3>
-    <p className="text-sm text-gray-500 font-medium">{items}</p>
-  </div>
-);
-
-const KidsInfoBox = ({ name, items }) => (
-  <div className="absolute bottom-35 right-12 bg-white rounded-lg px-6 py-4 shadow-sm">
-    <h3 className="font-semibold text-xl text-gray-900 mb-2">{name}</h3>
-    <p className="text-sm text-gray-500 font-medium">{items}</p>
-  </div>
-);
+// Unified info box positioned at top-right for consistency
+const CategoryInfoBox = ({ name, items }) => {
+  const isMen = name?.toLowerCase() === 'men';
+  // Men label shifts to top-left; others remain top-right
+  return (
+    <div
+      className={`absolute top-3 ${isMen ? 'left-3 md:left-4' : 'right-3 md:right-4'} bg-white/90 backdrop-blur-sm rounded-md px-3 py-2 shadow-sm md:top-4 md:px-4 md:py-3`}
+    >
+      <h3 className="font-semibold text-sm md:text-lg text-gray-900 mb-0 md:mb-1 leading-tight">{name}</h3>
+      <p className="text-[10px] md:text-xs text-gray-500 font-medium tracking-wide">{items}</p>
+    </div>
+  );
+};
 const Categories = () => {
   const navigate = useNavigate();
   const [counts, setCounts] = useState([]);
@@ -77,15 +70,15 @@ const Categories = () => {
   };
 
   return (
-    <section className="py-12 bg-white">
+  <section className="py-10 sm:py-12 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Desktop grid */}
-        <div className="hidden md:grid grid-cols-3 gap-6">
+  <div className="hidden md:grid grid-cols-3 gap-6">
           {categories.map((category, index) => (
             <div
               key={category.id}
               onClick={() => handleCategoryClick(category.name)}
-              className="group cursor-pointer bg-gray-50 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 h-64 w-full transform hover:-translate-y-1"
+              className="group cursor-pointer bg-gray-50 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 h-60 lg:h-64 w-full transform hover:-translate-y-1"
             >
               <div className="relative w-full h-full bg-gray-100 overflow-hidden">
                 <img
@@ -93,30 +86,21 @@ const Categories = () => {
                   alt={category.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
-                {index === 0 && (
-                  <WomenInfoBox name={category.name} items={category.items} />
-                )}
-                {index === 1 && (
-                  <MenInfoBox name={category.name} items={category.items} />
-                )}
-                {index === 2 && (
-                  <KidsInfoBox name={category.name} items={category.items} />
-                )}
+                <CategoryInfoBox name={category.name} items={category.items} />
               </div>
             </div>
           ))}
         </div>
         {/* Mobile horizontal slider */}
         <div className="md:hidden">
-          <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory">
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory px-1">
             {categories.map((category, index) => (
               <div
                 key={category.id}
                 onClick={() => handleCategoryClick(category.name)}
                 className={
-                  index === 0
-                    ? "group cursor-pointer bg-gray-50 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 h-64 min-w-full max-w-full flex-shrink-0 snap-center"
-                    : "group cursor-pointer bg-gray-50 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 h-64 min-w-[80vw] max-w-xs flex-shrink-0 snap-center"
+                  // Unified width for all mobile cards
+                  "group cursor-pointer bg-gray-50 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 h-52 min-w-[72vw] max-w-[72vw] first:min-w-[85vw] first:max-w-[85vw] flex-shrink-0 snap-center relative ring-1 ring-transparent hover:ring-blue-400"
                 }
               >
                 <div className="relative w-full h-full bg-gray-100 overflow-hidden">
@@ -125,15 +109,8 @@ const Categories = () => {
                     alt={category.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  {index === 0 && (
-                    <WomenInfoBox name={category.name} items={category.items} />
-                  )}
-                  {index === 1 && (
-                    <MenInfoBox name={category.name} items={category.items} />
-                  )}
-                  {index === 2 && (
-                    <KidsInfoBox name={category.name} items={category.items} />
-                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/5 to-transparent pointer-events-none" />
+                  <CategoryInfoBox name={category.name} items={category.items} />
                 </div>
               </div>
             ))}

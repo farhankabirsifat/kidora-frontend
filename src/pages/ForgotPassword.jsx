@@ -8,6 +8,7 @@ export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,7 +26,12 @@ export default function ForgotPassword() {
   }
 
   async function handleReset(e) {
-    e.preventDefault(); setError(''); setMessage(''); setLoading(true);
+    e.preventDefault(); setError(''); setMessage('');
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    setLoading(true);
     try {
       await resetPassword({ email, code, newPassword });
       setMessage('Password reset successful. Redirecting to login...');
@@ -50,7 +56,7 @@ export default function ForgotPassword() {
           <form onSubmit={handleRequest} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">Email</label>
-              <input type="email" className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={email} onChange={e=>setEmail(e.target.value)} required />
+              <input type="email" placeholder="you@example.com" className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={email} onChange={e=>setEmail(e.target.value)} required />
             </div>
             <button disabled={loading} className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50">{loading ? 'Sending…' : 'Send Code'}</button>
           </form>
@@ -59,9 +65,10 @@ export default function ForgotPassword() {
           <form onSubmit={handleReset} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">Verification Code</label>
-              <input type="text" maxLength={6} className="mt-1 w-full border rounded-lg px-3 py-2 tracking-widest text-center focus:outline-none focus:ring-2 focus:ring-blue-500" value={code} onChange={e=>setCode(e.target.value.replace(/[^0-9]/g,''))} required />
+              <input type="text" maxLength={6} placeholder="123456" className="mt-1 w-full border rounded-lg px-3 py-2 tracking-widest text-center focus:outline-none focus:ring-2 focus:ring-blue-500" value={code} onChange={e=>setCode(e.target.value.replace(/[^0-9]/g,''))} required />
             </div>
-            <PasswordField label="New Password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} />
+            <PasswordField label="New Password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} placeholder="New password" />
+            <PasswordField label="Confirm Password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} placeholder="Repeat new password" />
             <button disabled={loading} className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50">{loading ? 'Resetting…' : 'Reset Password'}</button>
             <button type="button" onClick={()=>setStep(1)} className="w-full text-xs text-gray-500 hover:text-gray-700">Back</button>
           </form>

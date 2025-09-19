@@ -38,20 +38,20 @@ export default function SignupPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700">First name</label>
-              <input name="firstName" className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={form.firstName} onChange={handleChange} required />
+              <input name="firstName" placeholder="Abir" className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={form.firstName} onChange={handleChange} required />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Last name</label>
-              <input name="lastName" className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={form.lastName} onChange={handleChange} required />
+              <input name="lastName" placeholder="Habib" className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={form.lastName} onChange={handleChange} required />
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Email</label>
-            <input type="email" name="email" className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={form.email} onChange={handleChange} required />
+            <input type="email" name="email" placeholder="you@example.com" className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={form.email} onChange={handleChange} required />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Phone</label>
-            <input name="phone" className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={form.phone} onChange={handleChange} required />
+            <input name="phone" placeholder="01XXXXXXXXX" className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value={form.phone} onChange={handleChange} required />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Password</label>
@@ -60,6 +60,7 @@ export default function SignupPage() {
                 type={showPassword ? 'text' : 'password'}
                 name="password"
                 autoComplete="new-password"
+                placeholder="Create password"
                 className="mt-1 w-full border rounded-lg pr-10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={form.password}
                 onChange={handleChange}
@@ -97,6 +98,7 @@ export default function SignupPage() {
                 type={showConfirmPassword ? 'text' : 'password'}
                 name="confirmPassword"
                 autoComplete="new-password"
+                placeholder="Repeat password"
                 className={`mt-1 w-full border rounded-lg pr-10 px-3 py-2 focus:outline-none focus:ring-2 ${form.confirmPassword && form.password !== form.confirmPassword ? 'border-red-300 focus:ring-red-400' : 'focus:ring-blue-500'}`}
                 value={form.confirmPassword}
                 onChange={handleChange}

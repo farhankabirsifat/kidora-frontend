@@ -51,12 +51,12 @@ function AppShell() {
   const location = useLocation();
   const pathname = location.pathname;
   const isAdmin = pathname.startsWith('/admin');
-  const isAuthPage = pathname === '/login' || pathname === '/signup';
+  const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname === '/forgot-password';
   const { loading } = useAuth();
   if (loading) return null;
   return (
     <div className={`min-h-screen bg-gray-50 flex flex-col ${!isAdmin && !isAuthPage ? 'pt-16' : ''}`}>
-      {/* Header area: show Navbar on normal pages; for auth pages show centered logo */}
+      {/* Header area: show Navbar on normal pages; for auth & recovery pages hide it */}
       {!isAdmin && !isAuthPage && <Navbar />}
       <div className="flex-1">
         <Routes>

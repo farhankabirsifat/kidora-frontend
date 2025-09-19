@@ -22,6 +22,7 @@ import Dashboard from "./admin/pages/Dashboard";
 import Products from "./admin/pages/Products";
 import HeroBanners from "./admin/pages/HeroBanners";
 import AdminOrders from "./admin/pages/Orders";
+import Customers from "./admin/pages/Customers";
 import "./App.css";
 
 // Route guards
@@ -73,6 +74,7 @@ function AppShell() {
             <Route path="products" element={<Products />} />
             <Route path="hero" element={<HeroBanners />} />
             <Route path="orders" element={<AdminOrders />} />
+            <Route path="customers" element={<Customers />} />
           </Route>
         </Routes>
       </div>

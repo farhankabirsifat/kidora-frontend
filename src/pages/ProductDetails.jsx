@@ -700,7 +700,9 @@ const ProductDetails = () => {
                     discountPercent: product.discount || 0,
                     quantity: quantity,
                     selectedSize: selectedSize,
+                    freeShipping: product.freeShipping || false,
                   };
+                  console.log('[BuyNow] item payload:', item);
                   navigate("/checkout", { state: { buyNow: true, item } });
                 }}
                 className={`w-full py-3 px-6 rounded-xl font-semibold transition-colors ${((product?.sizes || product?._raw?.sizes_stock) && Number((product?.sizes || product?._raw?.sizes_stock)[selectedSize] || 0) <= 0) ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-gray-900 text-white hover:bg-gray-800'}`}

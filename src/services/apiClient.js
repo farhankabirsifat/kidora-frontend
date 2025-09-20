@@ -1,5 +1,5 @@
 // Simple API client wrapper
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://127.0.0.1:8000';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://127.0.0.1:8000' || "https://api.kidora.com.bd/";
 
 function withQuery(url, params) {
   if (!params) return url;

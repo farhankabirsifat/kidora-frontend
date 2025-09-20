@@ -39,6 +39,7 @@ const ProductDetails = () => {
   const [thumbTouchEnd, setThumbTouchEnd] = useState(null);
   const [thumbIsDragging, setThumbIsDragging] = useState(false);
   const [thumbDragOffset, setThumbDragOffset] = useState(0);
+  const [shareFeedback, setShareFeedback] = useState('');
 
   // Scroll to top when component mounts or productId changes
   useEffect(() => {
@@ -191,6 +192,31 @@ const ProductDetails = () => {
     }
     const discounted = Math.round(priceNum * (1 - product.discount / 100));
     return `৳ ${discounted}`;
+  };
+
+  const handleShare = async () => {
+    if (!product) return;
+    const url = window.location.href;
+    const title = product.title || 'Product';
+    const text = `Check this out on Kidora: ${title}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title, text, url });
+        setShareFeedback('Shared successfully');
+      } else if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(url);
+        setShareFeedback('Link copied');
+      } else {
+        // Fallback: temporary input copy
+        const el = document.createElement('input');
+        el.value = url; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
+        setShareFeedback('Link copied');
+      }
+    } catch (e) {
+      setShareFeedback('Share failed');
+    } finally {
+      setTimeout(()=> setShareFeedback(''), 2500);
+    }
   };
 
   if (loading) {
@@ -682,8 +708,11 @@ const ProductDetails = () => {
                     }`}
                   />
                 </button>
-                <button className="p-3 border border-gray-300 rounded-xl hover:bg-gray-50">
+                <button onClick={handleShare} className="relative p-3 border border-gray-300 rounded-xl hover:bg-gray-50">
                   <Share2 className="w-6 h-6" />
+                  {shareFeedback && (
+                    <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black text-white text-[10px] px-2 py-1 rounded shadow">{shareFeedback}</span>
+                  )}
                 </button>
               </div>
 

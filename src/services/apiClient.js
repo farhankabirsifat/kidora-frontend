@@ -5,12 +5,12 @@
 // 3. Future production custom domain API (api.kidora.com.bd) when live
 // 4. Local dev fallback
 const explicit = import.meta.env.VITE_API_BASE && import.meta.env.VITE_API_BASE.trim();
-const PROD_RENDER = 'https://kidora-backend-a9fx.onrender.com';
+const PROD_RENDER = 'https://kidora-backend-arv5.onrender.com';
 const PROD_CUSTOM = 'https://api.kidora.com.bd'; // move after render until DNS + backend mapping is active
 const LOCAL_DEFAULT = 'http://127.0.0.1:8000';
 
 let API_BASE = explicit || PROD_RENDER || PROD_CUSTOM || LOCAL_DEFAULT; // updated ordering
-
+// let API_BASE = LOCAL_DEFAULT
 // Normalize: remove trailing slash for consistency
 if (API_BASE.endsWith('/')) API_BASE = API_BASE.slice(0, -1);
 

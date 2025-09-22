@@ -54,6 +54,20 @@ export default function ProfilePage() {
   const email = user?.email || 'user@example.com';
   const initials = ((user?.firstName?.[0] || user?.email?.[0] || 'U') + '').toUpperCase();
 
+  // Compute total spent with safe parsing & rounding to 2 decimals, removing float artifacts
+  const totalSpentRaw = orders.reduce((sum, o) => {
+    const val = o?.total;
+    if (val == null) return sum;
+    if (typeof val === 'number') return sum + val;
+    // If string like '৳ 1234' or '1234.50'
+    const n = parseFloat(String(val).replace(/[৳,$\s]/g, ''));
+    return sum + (isNaN(n) ? 0 : n);
+  }, 0);
+  const totalSpentRounded = Math.round((totalSpentRaw + Number.EPSILON) * 100) / 100; // up to 2 decimals
+  const totalSpentDisplay = (totalSpentRounded % 1 === 0)
+    ? totalSpentRounded.toFixed(0)
+    : totalSpentRounded.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+
   const handleAdvanceStatus = (orderId) => {
     advanceOrderStatus(orderId);
   };
@@ -165,7 +179,7 @@ export default function ProfilePage() {
                 <p className="text-xs text-green-700 font-medium">Wishlist</p>
               </div>
               <div className="p-3 rounded-xl bg-indigo-50 col-span-2">
-                <p className="text-xl font-bold text-indigo-600">৳ {orders.reduce((s,o)=>s+o.total,0)}</p>
+                <p className="text-xl font-bold text-indigo-600">৳ {totalSpentDisplay}</p>
                 <p className="text-xs text-indigo-700 font-medium">Total Spent</p>
               </div>
             </div>

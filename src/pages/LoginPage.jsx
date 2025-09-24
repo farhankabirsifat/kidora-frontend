@@ -41,9 +41,6 @@ export default function LoginPage() {
           </div>
           <div>
             <PasswordField label="Password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Your password" />
-            <div className="text-right mt-1">
-              <Link to="/forgot-password" className="text-xs text-blue-600 hover:underline">Forgot password?</Link>
-            </div>
           </div>
           <button disabled={loading} className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50">{loading ? 'Signing in…' : 'Sign in'}</button>
         </form>

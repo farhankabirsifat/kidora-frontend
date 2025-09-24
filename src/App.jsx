@@ -17,7 +17,7 @@ import OrdersPage from "./pages/OrdersPage";
 import ReturnPolicyPage from "./pages/ReturnPolicyPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
-import ForgotPassword from "./pages/ForgotPassword";
+// ForgotPassword removed as email/OTP flow is disabled
 import AdminLogin from "./pages/AdminLogin";
 import AdminLayout from "./admin/AdminLayout";
 import Dashboard from "./admin/pages/Dashboard";
@@ -55,7 +55,7 @@ function AppShell() {
   const location = useLocation();
   const pathname = location.pathname;
   const isAdmin = pathname.startsWith('/kidora-admin');
-  const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname === '/forgot-password' || pathname === '/404';
+  const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname === '/404';
   const { loading } = useAuth();
   if (loading) return null;
   return (
@@ -74,7 +74,7 @@ function AppShell() {
           <Route path="/search" element={<SearchPage />} />
           <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
           <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
-          <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
+          {/* Forgot password route removed */}
           <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
           <Route path="/orders" element={<PrivateRoute><OrdersPage /></PrivateRoute>} />
           <Route path="/return-policy" element={<PrivateRoute><ReturnPolicyPage /></PrivateRoute>} />
